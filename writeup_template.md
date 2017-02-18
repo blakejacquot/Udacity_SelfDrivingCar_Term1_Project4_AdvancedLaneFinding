@@ -23,7 +23,7 @@ The goals / steps of this project are:
 [image6]: ./examples/example_output.jpg "Output"
 [video1]: ./project_video.mp4 "Video"
 
-##[Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
+##[Rubric](https://review.udacity.com/#!/rubrics/571/view) Responses
 
 ---
 ###Writeup / README
@@ -31,9 +31,9 @@ The goals / steps of this project are:
 ####1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.  [Here](https://github.com/udacity/CarND-Advanced-Lane-Lines/blob/master/writeup_template.md) is a template writeup for this project you can use as a guide and a starting point.
 
 You're reading it!
-###Camera Calibration
-
 ---
+
+###Camera Calibration
 ####1. Briefly state how you computed the camera matrix and distortion coefficients. Provide an example of a distortion corrected calibration image.
 
 The code for this step is contained in the first code cell of the IPython notebook located in "./examples/example.ipynb" (or in lines # through # of the file called `some_file.py`).
