@@ -17,8 +17,15 @@ import cv2
 
 
 def compute_camera_cal(dir_cal_images):
-    """
-    Docstring
+    """Compute distortion parameters for chessboard jpg's in a directory
+
+    Args:
+        dir_cal_images: Directory of calibration chessboard images
+
+    Returns:
+        objpoints:
+        imgpoints:
+
     """
     print('Computing camera calibration matrices')
     # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
@@ -56,8 +63,15 @@ def compute_camera_cal(dir_cal_images):
     return objpoints, imgpoints
 
 def undistort_image(objpoints, imgpoints, img):
-    """
-    Docstring
+    """Undistort an image with calibration parameters
+
+    Args:
+        objpoints:
+        imgpoints:
+        img:
+
+    Returns:
+        undistorted_img:
     """
     gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints,
@@ -96,7 +110,17 @@ def write_annotated_image():
     pass
 
 def proc_pipeline(objpoints, imgpoints, images):
-    """
+    """ Process an image pipline on an image
+
+    Args:
+        objpoints:
+        imgpoints:
+        images:
+
+    Returns:
+
+
+
     Compute the camera calibration matrix and distortion coefficients given a set of
     chessboard images.
 
@@ -144,9 +168,9 @@ def main():
     dir_output_images = 'output_images'
 
 
-    proc_distortion_data = 1
+    proc_distortion_data = 0
     proc_pipeline_cal_images = 0
-    proc_pipeline_test_images = 0
+    proc_pipeline_test_images = 1
     proc_pipeline_target_images = 0
 
     if proc_distortion_data == 1:
@@ -155,9 +179,11 @@ def main():
         pickle_data["objpoints"] = objpoints
         pickle_data["imgpoints"] = imgpoints
         pickle.dump( pickle_data, open("calibration_data.p", "wb" ))
-        pickle_data = pickle.load(open("calibration_data.p","rb"))
-        objpoints = pickle_data["objpoints"]
-        imgpoints = pickle_data["imgpoints"]
+
+
+    pickle_data = pickle.load(open("calibration_data.p","rb"))
+    objpoints = pickle_data["objpoints"]
+    imgpoints = pickle_data["imgpoints"]
 
 
 

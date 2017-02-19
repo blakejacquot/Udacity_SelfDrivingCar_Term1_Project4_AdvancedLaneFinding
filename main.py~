@@ -144,9 +144,9 @@ def main():
     dir_output_images = 'output_images'
 
 
-    proc_distortion_data = 1
+    proc_distortion_data = 0
     proc_pipeline_cal_images = 0
-    proc_pipeline_test_images = 0
+    proc_pipeline_test_images = 1
     proc_pipeline_target_images = 0
 
     if proc_distortion_data == 1:
@@ -156,9 +156,10 @@ def main():
         pickle_data["imgpoints"] = imgpoints
         pickle.dump( pickle_data, open("calibration_data.p", "wb" ))
 
-        pickle_data = pickle.load(open("calibration_data.p","rb"))
-        objpoints = pickle_data["objpoints"]
-        imgpoints = pickle_data["imgpoints"]
+
+    pickle_data = pickle.load(open("calibration_data.p","rb"))
+    objpoints = pickle_data["objpoints"]
+    imgpoints = pickle_data["imgpoints"]
 
 
 
