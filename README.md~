@@ -61,26 +61,24 @@ distortion correction to the test image using the `cv2.undistort()` function and
 obtained this result:
 
 Original image
-![alt text][cal-1]
+![alt text][cal_1]
 
 Undistorted image
-![alt text][cal-1-undistort]
-
-
+![alt text][cal_1_undistort]
 
 
 ---
 ###Pipeline (single images)
 
 ####1. Provide an example of a distortion-corrected image.
-To demonstrate this step, I will describe how I apply the distortion correction to one of
-the test images like this one:
+Read in calibration parameters from pickle file and use `undistort_image` function from
+file `main.py`.
 
+Original image
+![alt text][test_2]
 
-
-![alt text][image2]
-![alt text][test-2]
-![alt text][test-2-undistorted]
+Undistorted image
+![alt text][test_2_undistorted]
 
 
 

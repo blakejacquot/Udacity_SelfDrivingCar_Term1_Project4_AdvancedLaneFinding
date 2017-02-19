@@ -44,8 +44,8 @@ You're reading it.
 
 ###Camera Calibration
 ####1. Briefly state how you computed the camera matrix and distortion coefficients.
-The code for this step is contained in the first code cell of the IPython notebook located
-in `compute_camera_cal` and `undistort_image` functions from file `main.py`.
+The code for this step is in `compute_camera_cal` and `undistort_image` functions from
+file `main.py`.
 
 I start by preparing "object points", which will be the (x, y, z) coordinates of the
 chessboard corners in the world. Here I am assuming the chessboard is fixed on the (x, y)
@@ -67,19 +67,17 @@ Undistorted image
 ![alt text][cal_1_undistort]
 
 
-
-
 ---
 ###Pipeline (single images)
 
 ####1. Provide an example of a distortion-corrected image.
-To demonstrate this step, I will describe how I apply the distortion correction to one of
-the test images like this one:
+Read in calibration parameters from pickle file and use `undistort_image` function from
+file `main.py`. The undistortion is subtle, but present.
 
-
-
-![alt text][image2]
+Original image
 ![alt text][test_2]
+
+Undistorted image
 ![alt text][test_2_undistorted]
 
 
