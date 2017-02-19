@@ -33,14 +33,13 @@ and vehicle position. (Not Done)
 
 ##[Rubric](https://review.udacity.com/#!/rubrics/571/view) Responses
 
----
+
 ###Writeup / README
 
-####1. Provide a Writeup / README that includes all the rubric points and how you
-addressed each one.  You can submit your writeup as markdown or pdf.
+####1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.
 
-You're reading it.
----
+You are  reading it.
+
 
 ###Camera Calibration
 ####1. Briefly state how you computed the camera matrix and distortion coefficients.
@@ -82,9 +81,7 @@ Undistorted image
 
 
 
-####2. Describe how (and identify where in your code) you used color transforms, gradients
-or other methods to create a thresholded binary image.  Provide an example of a binary
-image result.
+####2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 
 I used a combination of color and gradient thresholds to generate a binary image
 (thresholding steps at lines # through # in `another_file.py`).  Here's an example of
@@ -92,8 +89,7 @@ my output for this step.  (note: this is not actually from one of the test image
 
 ![alt text][image3]
 
-####3. Describe how (and identify where in your code) you performed a perspective
-transform and provide an example of a transformed image.
+####3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
 The code for my perspective transform includes a function called `warper()`, which
 appears in lines 1 through 8 in the file `example.py` (output_images/examples/example.py)
@@ -129,21 +125,18 @@ parallel in the warped image.
 
 ![alt text][image4]
 
-####4. Describe how (and identify where in your code) you identified lane-line pixels and
-fit their positions with a polynomial?
+####4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
 Then I did some other stuff and fit my lane lines with a 2nd order polynomial kinda like
 this:
 
 ![alt text][image5]
 
-####5. Describe how (and identify where in your code) you calculated the radius of
-curvature of the lane and the position of the vehicle with respect to center.
+####5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
 I did this in lines # through # in my code in `my_other_file.py`
 
-####6. Provide an example image of your result plotted back down onto the road such that
-the lane area is identified clearly.
+####6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
 I implemented this step in lines # through # in my code in `yet_another_file.py` in the
 function `map_lane()`.  Here is an example of my result on a test image:
@@ -154,9 +147,7 @@ function `map_lane()`.  Here is an example of my result on a test image:
 
 ###Pipeline (video)
 
-####1. Provide a link to your final video output.  Your pipeline should perform reasonably
-well on the entire project video (wobbly lines are ok but no catastrophic failures that
-would cause the car to drive off the road!).
+####1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
 
 Here's a [link to my video result](./project_video.mp4)
 
@@ -164,8 +155,7 @@ Here's a [link to my video result](./project_video.mp4)
 
 ###Discussion
 
-####1. Briefly discuss any problems / issues you faced in your implementation of this
-project.  Where will your pipeline likely fail?  What could you do to make it more robust?
+####1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
 Here I'll talk about the approach I took, what techniques I used, what worked and why,
 where the pipeline might fail and how I might improve it if I were going to pursue this
