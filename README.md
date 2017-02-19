@@ -4,17 +4,18 @@
 
 **Advanced Lane Finding Project**
 The goals / steps of this project are:
-* Compute the camera calibration matrix and distortion coefficients given a set of chessboard images. (DONE)
+* Compute the camera calibration matrix and distortion coefficients given a set of
+chessboard images. (DONE)
 * Apply a distortion correction to raw images. (DONE)
 * Use color transforms, gradients, etc., to create a thresholded binary image. (Not Done)
 * Apply a perspective transform to rectify binary image ("birds-eye view"). (Not Done)
 * Detect lane pixels and fit to find the lane boundary. (Not Done)
 * Determine the curvature of the lane and vehicle position with respect to center. (Not Done)
 * Warp the detected lane boundaries back onto the original image. (Not Done)
-* Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position. (Not Done)
+* Output visual display of the lane boundaries and numerical estimation of lane curvature
+and vehicle position. (Not Done)
 
 [//]: # (Image References)
-
 [image1]: ./examples/undistort_output.png "Undistorted"
 [image2]: ./test_images/test1.jpg "Road Transformed"
 [image3]: ./examples/binary_combo_example.jpg "Binary Example"
@@ -23,6 +24,14 @@ The goals / steps of this project are:
 [image6]: ./examples/example_output.jpg "Output"
 [video1]: ./project_video.mp4 "Video"
 
+
+[cal-1]: ./camera_cal/calibration1.jpg "Cal-1"
+[test-2]: ./test_images/test2.jpg "Test-1"
+
+[cal-1-undistort]: ./output_images/calibration1_undistorted "Undistorted-1"
+
+
+
 ##[Rubric](https://review.udacity.com/#!/rubrics/571/view) Responses
 
 ---
@@ -30,15 +39,18 @@ The goals / steps of this project are:
 
 ####1. Provide a Writeup / README that includes all the rubric points and how you
 addressed each one.  You can submit your writeup as markdown or pdf.
- [Here](https://github.com/udacity/CarND-Advanced-Lane-Lines/blob/master/writeup_template.md)
- is a template writeup for this project you can use as a guide and a starting point.
 
-You're reading it!
+You're reading it.
 ---
 
 ###Camera Calibration
 ####1. Briefly state how you computed the camera matrix and distortion coefficients.
 Provide an example of a distortion corrected calibration image.
+
+
+
+
+
 
 The code for this step is contained in the first code cell of the IPython notebook located
 in "./examples/example.ipynb" (or in lines # through # of the file called `some_file.py`).
@@ -57,6 +69,9 @@ distortion correction to the test image using the `cv2.undistort()` function and
 obtained this result:
 
 ![alt text][image1]
+![alt text][cal-1-undistort]
+
+
 
 ---
 ###Pipeline (single images)
