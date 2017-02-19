@@ -28,7 +28,7 @@ and vehicle position. (Not Done)
 [cal-1]: ./camera_cal/calibration1.jpg "Cal-1"
 [test-2]: ./test_images/test2.jpg "Test-1"
 
-[cal-1-undistort]: ./output_images/calibration1_undistorted "Undistorted-1"
+[cal-1-undistort]: ./output_images/calibration1_undistorted.jpg "Undistorted-1"
 
 
 

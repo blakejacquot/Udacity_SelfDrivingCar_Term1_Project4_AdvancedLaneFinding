@@ -28,7 +28,7 @@ and vehicle position. (Not Done)
 [cal-1]: ./camera_cal/calibration1.jpg "Cal-1"
 [test-2]: ./test_images/test2.jpg "Test-1"
 
-[undistort-1]: ./output_images/calibration1_undistorted "Undistorted"
+[cal-1-undistort]: ./output_images/calibration1_undistorted "Undistorted-1"
 
 
 
@@ -69,6 +69,9 @@ distortion correction to the test image using the `cv2.undistort()` function and
 obtained this result:
 
 ![alt text][image1]
+![alt text][cal-1-undistort]
+
+
 
 ---
 ###Pipeline (single images)
