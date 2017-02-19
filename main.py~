@@ -164,8 +164,8 @@ def main():
     dir_output_images = os.path.join('output_images')
 
     proc_distortion_data = 0
-    proc_pipeline_cal_images = 1
-    proc_pipeline_test_images = 0
+    proc_pipeline_cal_images = 0
+    proc_pipeline_test_images = 1
     proc_pipeline_target_images = 0
 
     if proc_distortion_data == 1:
@@ -190,16 +190,20 @@ def main():
             img = cv2.imread(fname)
             ret_img = proc_pipeline(objpoints, imgpoints, img)
             curr_name = fname[-10:-4]
-            cv2.imwrite(curr_name + '.jpg', ret_img)
-
-
-
+            out_path = os.path.join(dir_output_images, curr_name + '.jpg')
+            cv2.imwrite(out_path, ret_img)
 
     if proc_pipeline_test_images == 1:
         search_phrase = os.path.join(dir_test_images, '*.jpg')
-        images_test = glob.glob(search_phrase)
-        proc_pipeline(objpoints, imgpoints, images_test)
-
+        images = glob.glob(search_phrase)
+        for fname in images:
+            print('Processing ', fname)
+            img = cv2.imread(fname)
+            ret_img = proc_pipeline(objpoints, imgpoints, img)
+            curr_name = fname[-10:-4]
+            print(curr_name)
+            out_path = os.path.join(dir_output_images, curr_name + '.jpg')
+            cv2.imwrite(out_path, ret_img)
 
     if proc_pipeline_target_images == 0:
         print(dir_output_images)

@@ -25,11 +25,10 @@ and vehicle position. (Not Done)
 [video1]: ./project_video.mp4 "Video"
 
 
-[cal-1]: ./camera_cal/calibration1.jpg "Cal-1"
-[test-2]: ./test_images/test2.jpg "Test-1"
-
-[cal-1-undistort]: ./output_images/calibration1_undistorted.jpg "Undistorted-1"
-
+[cal_1]: ./camera_cal/calibration1.jpg "Cal-1"
+[test_2]: ./test_images/test2.jpg "Test-1"
+[cal_1_undistort]: ./output_images/calibration1_undistorted.jpg "Undistorted-1"
+[test_2_undistorted]: ./output_images/test2_undistorted.jpg "Undistorted-1"
 
 
 ##[Rubric](https://review.udacity.com/#!/rubrics/571/view) Responses
@@ -45,15 +44,8 @@ You're reading it.
 
 ###Camera Calibration
 ####1. Briefly state how you computed the camera matrix and distortion coefficients.
-Provide an example of a distortion corrected calibration image.
-
-
-
-
-
-
 The code for this step is contained in the first code cell of the IPython notebook located
-in "./examples/example.ipynb" (or in lines # through # of the file called `some_file.py`).
+in `compute_camera_cal` and `undistort_image` functions from file `main.py`.
 
 I start by preparing "object points", which will be the (x, y, z) coordinates of the
 chessboard corners in the world. Here I am assuming the chessboard is fixed on the (x, y)
@@ -68,8 +60,12 @@ distortion coefficients using the `cv2.calibrateCamera()` function.  I applied t
 distortion correction to the test image using the `cv2.undistort()` function and
 obtained this result:
 
-![alt text][image1]
+Original image
+![alt text][cal-1]
+
+Undistorted image
 ![alt text][cal-1-undistort]
+
 
 
 
@@ -79,7 +75,15 @@ obtained this result:
 ####1. Provide an example of a distortion-corrected image.
 To demonstrate this step, I will describe how I apply the distortion correction to one of
 the test images like this one:
+
+
+
 ![alt text][image2]
+![alt text][test-2]
+![alt text][test-2-undistorted]
+
+
+
 ####2. Describe how (and identify where in your code) you used color transforms, gradients
 or other methods to create a thresholded binary image.  Provide an example of a binary
 image result.
