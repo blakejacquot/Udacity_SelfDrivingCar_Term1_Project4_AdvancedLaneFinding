@@ -68,8 +68,14 @@ distortion coefficients using the `cv2.calibrateCamera()` function.  I applied t
 distortion correction to the test image using the `cv2.undistort()` function and
 obtained this result:
 
-![alt text][image1]
+
+
+Original image
+![alt text][cal-1]
+
+Undistorted image
 ![alt text][cal-1-undistort]
+
 
 
 
