@@ -37,10 +37,17 @@ and vehicle position. (Not Done)
 
 
 [cal_123]: ./camera_cal/calibration1.jpg "Cal-1"  | width=100
-![alt text](./camera_cal/calibration1.jpg | width=100)
+![alt text](./camera_cal/calibration1.jpg =100x20)
+
+
+
+![](./pic/pic1_50.png )
 
 
 [t1p1_link]: https://github.com/blakejacquot/udacity_SDC_T1P1_LaneFinding/blob/master/P1.ipynb
+
+
+
 
 ##[Rubric](https://review.udacity.com/#!/rubrics/571/view) Responses
 
