@@ -90,9 +90,6 @@ Binary image
 ![alt text][test_2_bin]
 ![](./output_images/test2_bin.jpg)
 
-[test_2_undistorted]: ./output_images/test2_undistorted.jpg "Undistorted_test-1"
-[test_2_bin]:  "bin_test-1"
-[test_2_trans]: ./output_images/test2_perspectivetransformed.jpg "trans_test-1"
 
 
 

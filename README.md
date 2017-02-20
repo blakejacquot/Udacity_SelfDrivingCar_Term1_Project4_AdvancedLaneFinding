@@ -70,9 +70,8 @@ file `main.py`. The undistortion is subtle, but present.
 Original image
 ![](./test_images/test2.jpg)
 
-
 Undistorted image
-![](./output_images/calibration1_undistorted.jpg)
+![](./output_images/test2_undistorted.jpg)
 
 ####2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 My method borrows heavily from my [first project][t1p1_link] in this course.
@@ -104,7 +103,11 @@ lines.
 An example of a transformed image is:
 
 Transformed image
-![alt text][test_2_trans]
+![](./output_images/test2_perspectivetransformed.jpg)
+
+
+
+
 
 TBD
 TBD
