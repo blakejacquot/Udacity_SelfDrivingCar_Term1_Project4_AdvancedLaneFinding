@@ -36,7 +36,8 @@ and vehicle position. (Not Done)
 
 
 
-![alt text][./camera_cal/calibration1.jpg "Cal-1" =1x]
+[cal_123]: ./camera_cal/calibration1.jpg "Cal-1"
+![alt text][cal_123]
 
 
 [t1p1_link]: https://github.com/blakejacquot/udacity_SDC_T1P1_LaneFinding/blob/master/P1.ipynb
