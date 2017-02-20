@@ -102,8 +102,30 @@ Binary image
 
 
 
-Binary image
+Transformed image
 ![alt text][test_2_trans]
+
+
+
+src [[[  550.   450.]
+  [  720.   450.]
+  [  150.   670.]
+  [ 1150.   670.]]]
+dst [[    0.     0.]
+ [ 1280.     0.]
+ [    0.   720.]
+ [ 1280.   720.]]
+
+
+This resulted in the following source and destination points:
+
+| Source        | Destination   |
+|:-------------:|:-------------:|
+| 585, 460      | 320, 0        |
+| 203, 720      | 320, 720      |
+| 1127, 720     | 960, 720      |
+| 695, 460      | 960, 0        |
+
 
 
 The code for my perspective transform includes a function called `warper()`, which
