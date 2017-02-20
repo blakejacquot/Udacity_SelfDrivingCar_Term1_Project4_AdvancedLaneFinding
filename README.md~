@@ -25,15 +25,6 @@ and vehicle position. (Not Done)
 [video1]: ./project_video.mp4 "Video"
 
 
-[cal_1]: ./camera_cal/calibration1.jpg "Cal-1"
-[test_2]: ./test_images/test2.jpg "Test-1"
-[cal_1_undistort]: ./output_images/calibration1_undistorted.jpg "Undistorted_cal-1"
-[test_2_undistorted]: ./output_images/test2_undistorted.jpg "Undistorted_test-1"
-[test_2_bin]: ./output_images/test2_bin.jpg "bin_test-1"
-[test_2_trans]: ./output_images/test2_perspectivetransformed.jpg "trans_test-1"
-
-
-![](./camera_cal/calibration1.jpg | =100x20)
 
 ##[Rubric](https://review.udacity.com/#!/rubrics/571/view) Responses
 
@@ -64,10 +55,21 @@ distortion correction to the test image using the `cv2.undistort()` function and
 obtained this result:
 
 Original image
-![alt text][cal_1]
+![](./camera_cal/calibration1.jpg)
+
+
+
+[test_2]: ./test_images/test2.jpg "Test-1"
+[test_2_undistorted]: ./output_images/test2_undistorted.jpg "Undistorted_test-1"
+[test_2_bin]: ./output_images/test2_bin.jpg "bin_test-1"
+[test_2_trans]: ./output_images/test2_perspectivetransformed.jpg "trans_test-1"
+
+
+
+
 
 Undistorted image
-![alt text][cal_1_undistort]
+![](./output_images/calibration1_undistorted.jpg)
 
 ---
 ###Pipeline (single images)

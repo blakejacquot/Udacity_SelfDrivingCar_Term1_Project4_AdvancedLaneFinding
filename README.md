@@ -57,17 +57,6 @@ obtained this result:
 Original image
 ![](./camera_cal/calibration1.jpg)
 
-
-
-[test_2]: ./test_images/test2.jpg "Test-1"
-[test_2_undistorted]: ./output_images/test2_undistorted.jpg "Undistorted_test-1"
-[test_2_bin]: ./output_images/test2_bin.jpg "bin_test-1"
-[test_2_trans]: ./output_images/test2_perspectivetransformed.jpg "trans_test-1"
-
-
-
-
-
 Undistorted image
 ![](./output_images/calibration1_undistorted.jpg)
 
@@ -80,9 +69,19 @@ file `main.py`. The undistortion is subtle, but present.
 
 Original image
 ![alt text][test_2]
+![](./test_images/test2.jpg)
+
 
 Undistorted image
 ![alt text][test_2_undistorted]
+![](./output_images/calibration1_undistorted.jpg)
+
+
+
+[test_2_undistorted]: ./output_images/test2_undistorted.jpg "Undistorted_test-1"
+[test_2_bin]: ./output_images/test2_bin.jpg "bin_test-1"
+[test_2_trans]: ./output_images/test2_perspectivetransformed.jpg "trans_test-1"
+
 
 ####2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 My method borrows heavily from my [first project][t1p1_link] in this course.
