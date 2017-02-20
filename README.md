@@ -33,23 +33,7 @@ and vehicle position. (Not Done)
 [test_2_trans]: ./output_images/test2_perspectivetransformed.jpg "trans_test-1"
 
 
-![](https://github.com/blakejacquot/udacity_sdc_T1P4_AdvancedLaneFinding/output_images/calibration1_undistorted.jpg =50x50)
-
-
-
-
-[cal_123]: ./camera_cal/calibration1.jpg "Cal-1"  | width=100
-![alt text](./camera_cal/calibration1.jpg =100x20)
-
-
-
-![](./pic/pic1_50.png )
-
-
-[t1p1_link]: https://github.com/blakejacquot/udacity_SDC_T1P1_LaneFinding/blob/master/P1.ipynb
-
-
-
+![cal123](./camera_cal/calibration1.jpg)
 
 ##[Rubric](https://review.udacity.com/#!/rubrics/571/view) Responses
 
