@@ -83,6 +83,11 @@ Undistorted image
 ####2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 My method borrows heavily from my [first project][t1p1_link] in this course.
 
+The order of operations is:
+1. Grayscale image.
+2. Gaussian blur image with kernel of specified size.
+3. Apply Canny edge detection.
+
 Code for making binary image is in `make_binary_image` function of file `main.py`.
 
 

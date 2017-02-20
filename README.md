@@ -84,17 +84,13 @@ Undistorted image
 My method borrows heavily from my [first project][t1p1_link] in this course.
 
 The order of operations is:
-1. Grayscale image
-2. Gaussian blur image with kernel of size 5
-3. Apply Canny edge detection
+1. Grayscale image.
+2. Gaussian blur image with kernel of specified size.
+3. Apply Canny edge detection.
 
 Code for making binary image is in `make_binary_image` function of file `main.py`.
 
-
-
-I used a combination of color and gradient thresholds to generate a binary image
-(thresholding steps at lines # through # in `another_file.py`).  Here's an example of
-my output for this step.  (note: this is not actually from one of the test images)
+Here is an example of my output for this step:
 
 Binary image
 ![alt text][test_2_bin]
