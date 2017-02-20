@@ -150,31 +150,28 @@ def get_warp_params(img):
     """
     Docstring
     """
-     # Define src matrix
+
     img_shape = img.shape
     img_size = (img_shape[1],img_shape[0])
-    imshape = img.shape
+
+    # Define src matrix
     vert1 = (550, 450) # top left
     vert2 = (720, 450) # top right
-    vert3 = (150,imshape[0]-50) # bottom left
-    vert4 = (1150, imshape[0]-50) # bottom right
+    vert3 = (1150, img_shape[0]-50) # bottom right
+    vert4 = (150,img_shape[0]-50) # bottom left
     src = np.float32([[vert1, vert2, vert3, vert4]])
-    #print('binvert', vertices)
-    #proc_img = region_of_interest(proc_img, vertices)
-    #print('new vertices', src)
-    #
-    # Define src matrix vertices to mask and pull out lanes
-    #vert1 = (.42 * img_shape[1], .67 * img_shape[0]) # bottom left
-    #vert2 = (.58 * img_shape[1], .67 * img_shape[0]) # top left
-    #vert3 = (0 * img_shape[1],img_shape[0]) # top right
-    #vert4 = (1 * img_shape[1], img_shape[0]) # bottom right
-    #src = np.float32([[vert1, vert2, vert3, vert4]])
-    #print('copied src', src)
-
 
 
     # Define dst matrix for warping
-    dst = np.float32([[0,0],[img_shape[1],0],[0,img_shape[0]],[img_shape[1],img_shape[0]]])
+    vert1 = [0,0] # top left
+    vert2 = [img_size[0],0] # bottom left
+    vert3 = [img_size[0],img_size[1]] # top right
+    vert4 = [0,img_size[1]] # bottom right
+    dst = np.float32([[vert1, vert2, vert3, vert4]])
+
+    # Display info
+    print('src', src)
+    print('dst', dst)
 
     # Calculate perspective parameters for warping and unwarping
     M = cv2.getPerspectiveTransform(src, dst)
@@ -186,7 +183,6 @@ def warper(img, M):
     """
     Docstring
     """
-
     img_shape = img.shape
     img_size = (img_shape[1],img_shape[0])
     img_warped = cv2.warpPerspective(img, M, img_size)
