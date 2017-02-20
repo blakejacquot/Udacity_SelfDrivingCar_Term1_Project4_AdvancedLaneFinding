@@ -33,7 +33,7 @@ and vehicle position. (Not Done)
 [test_2_trans]: ./output_images/test2_perspectivetransformed.jpg "trans_test-1"
 
 
-![](./camera_cal/calibration1.jpg)
+![](./camera_cal/calibration1.jpg =100x20)
 
 ##[Rubric](https://review.udacity.com/#!/rubrics/571/view) Responses
 
