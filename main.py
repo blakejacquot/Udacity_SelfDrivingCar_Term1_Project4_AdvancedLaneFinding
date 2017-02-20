@@ -161,11 +161,19 @@ def get_warp_params(img):
     vert4 = (150,img_shape[0]-50) # bottom left
     src = np.float32([[vert1, vert2, vert3, vert4]])
 
-    # Define dst matrix for warping
+    # Define dst matrix for warping BCJ
     vert1 = [0,0] # top left
     vert2 = [img_size[0],0] # bottom left
     vert3 = [img_size[0],img_size[1]] # top right
     vert4 = [0,img_size[1]] # bottom right
+
+    # Define dst matrix for warping Udacity
+    vert1 = [0,0] # top left
+    vert2 = [img_size[0] + 100,0] # bottom left
+    vert3 = [img_size[0],img_size[1]] # top right
+    vert4 = [0 + 100,img_size[1]] # bottom right OK
+
+
     dst = np.float32([[vert1, vert2, vert3, vert4]])
 
     # Display info
