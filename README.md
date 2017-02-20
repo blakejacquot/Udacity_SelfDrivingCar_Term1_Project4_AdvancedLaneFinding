@@ -29,8 +29,9 @@ and vehicle position. (Not Done)
 [test_2]: ./test_images/test2.jpg "Test-1"
 [cal_1_undistort]: ./output_images/calibration1_undistorted.jpg "Undistorted_cal-1"
 [test_2_undistorted]: ./output_images/test2_undistorted.jpg "Undistorted_test-1"
-[test2_bin]: ./output_images/test2_bin.jpg "bin_test-1"
+[test_2_bin]: ./output_images/test2_bin.jpg "bin_test-1"
 
+[t1p1_link]: https://github.com/blakejacquot/udacity_SDC_T1P1_LaneFinding/blob/master/P1.ipynb
 
 ##[Rubric](https://review.udacity.com/#!/rubrics/571/view) Responses
 
@@ -66,7 +67,6 @@ Original image
 Undistorted image
 ![alt text][cal_1_undistort]
 
-
 ---
 ###Pipeline (single images)
 
@@ -80,9 +80,17 @@ Original image
 Undistorted image
 ![alt text][test_2_undistorted]
 
-
-
 ####2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
+My method borrows heavily from my [first project][t1p1_link] in this course.
+
+The order of operations is:
+1. Grayscale image
+2. Gaussian blur image with kernel of size 5
+3. Apply Canny edge detection
+
+Code for making binary image is in `make_binary_image` function of file `main.py`.
+
+
 
 I used a combination of color and gradient thresholds to generate a binary image
 (thresholding steps at lines # through # in `another_file.py`).  Here's an example of
