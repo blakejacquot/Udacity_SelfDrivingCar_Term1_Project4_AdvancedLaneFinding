@@ -7,7 +7,7 @@ The goals / steps of this project are:
 * Compute the camera calibration matrix and distortion coefficients given a set of
 chessboard images. (DONE)
 * Apply a distortion correction to raw images. (DONE)
-* Use color transforms, gradients, etc., to create a thresholded binary image. (Not Done)
+* Use color transforms, gradients, etc., to create a thresholded binary image. (DONE)
 * Apply a perspective transform to rectify binary image ("birds-eye view"). (Not Done)
 * Detect lane pixels and fit to find the lane boundary. (Not Done)
 * Determine the curvature of the lane and vehicle position with respect to center. (Not Done)
@@ -30,6 +30,9 @@ and vehicle position. (Not Done)
 [cal_1_undistort]: ./output_images/calibration1_undistorted.jpg "Undistorted_cal-1"
 [test_2_undistorted]: ./output_images/test2_undistorted.jpg "Undistorted_test-1"
 [test_2_bin]: ./output_images/test2_bin.jpg "bin_test-1"
+[test_2_trans]: ./output_images/test2_perspectivetransformed.jpg "trans_test-1"
+
+
 
 [t1p1_link]: https://github.com/blakejacquot/udacity_SDC_T1P1_LaneFinding/blob/master/P1.ipynb
 
@@ -96,6 +99,12 @@ Binary image
 ![alt text][test_2_bin]
 
 ####3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
+
+
+
+Binary image
+![alt text][test_2_trans]
+
 
 The code for my perspective transform includes a function called `warper()`, which
 appears in lines 1 through 8 in the file `example.py` (output_images/examples/example.py)
