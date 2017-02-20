@@ -27,8 +27,9 @@ and vehicle position. (Not Done)
 
 [cal_1]: ./camera_cal/calibration1.jpg "Cal-1"
 [test_2]: ./test_images/test2.jpg "Test-1"
-[cal_1_undistort]: ./output_images/calibration1_undistorted.jpg "Undistorted-1"
-[test_2_undistorted]: ./output_images/test2_undistorted.jpg "Undistorted-1"
+[cal_1_undistort]: ./output_images/calibration1_undistorted.jpg "Undistorted_cal-1"
+[test_2_undistorted]: ./output_images/test2_undistorted.jpg "Undistorted_test-1"
+[test2_bin]: ./output_images/test2_bin.jpg "bin_test-1"
 
 
 ##[Rubric](https://review.udacity.com/#!/rubrics/571/view) Responses
@@ -87,7 +88,8 @@ I used a combination of color and gradient thresholds to generate a binary image
 (thresholding steps at lines # through # in `another_file.py`).  Here's an example of
 my output for this step.  (note: this is not actually from one of the test images)
 
-![alt text][image3]
+Binary image
+![alt text][test_2_bin]
 
 ####3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
