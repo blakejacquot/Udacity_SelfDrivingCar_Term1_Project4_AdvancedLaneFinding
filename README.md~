@@ -56,10 +56,11 @@ distortion correction to the test image using the `cv2.undistort()` function and
 obtained this result:
 
 Original image
-![](./camera_cal/calibration1.jpg)
+<img src="./camera_cal/calibration1.jpg" width="70%">
+
 
 Undistorted image
-![](./output_images/calibration1_undistorted.jpg)
+<img src="./output_images/calibration1_undistorted.jpg" width="70%">
 
 ---
 ###Pipeline (single images)
@@ -69,10 +70,12 @@ Read in calibration parameters from pickle file and use `undistort_image` functi
 file `main.py`. The undistortion is subtle, but present.
 
 Original image
-![](./test_images/test2.jpg)
+<img src="./test_images/test2.jpg" width="70%">
+
 
 Undistorted image
-![](./output_images/test2_undistorted.jpg)
+<img src="./output_images/test2_undistorted.jpg" width="70%">
+
 
 ####2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 My method borrows heavily from my [first project][t1p1_link] in this course.
@@ -87,7 +90,8 @@ Code for making binary image is in `make_binary_image` function of file `main.py
 Here is an example of my output for this step:
 
 Binary image
-![](./output_images/test2_bin.jpg)
+<img src="./output_images/test2_bin.jpg" width="70%">
+
 
 ####3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
@@ -103,10 +107,12 @@ After choosing the source points for the transform, I sanity-checked results by 
 the resulting region of interest on straight lane lines and the transform of this image.
 
 Undistorted image with source points drawn:
-![](./output_images/test1_drawROI.jpg)
+<img src="./output_images/test1_drawROI.jpg" width="70%">
+
 
 Transformed image:
-![](./output_images/ines1_perspectivetransformed_drawROI.jpg)
+<img src="./output_images/ines1_perspectivetransformed_drawROI.jpg" width="70%">
+
 
 I used the following source and destination points:
 
@@ -125,13 +131,12 @@ To identify lane-line pixels, start with a Hough transformation to ... Next crop
 image with Hough lines down to the ROI specified by the perspective transformation.
 
 After Hough transformation and cropping:
-![](./output_images/ines2_drawHoughlines.jpg)
+<img src="./output_images/ines2_drawHoughlines.jpg" width="70%">
+
 
 After Hough transformation, cropping, and perspective transformation:
-![](./output_images/ines2_drawHoughlines.jpg)
+<img src="./output_images/ines2_drawHoughlines.jpg" width="70%">
 
-
-<img src="./output_images/ines2_drawHoughlines.jpg" width="40%">
 
 -Do hough transform
 -Crop to ROI
