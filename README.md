@@ -153,24 +153,49 @@ After Hough transformation, cropping, and perspective transformation:
 
 <table style="width:100%">
   <tr>
+    <td>Unistorted Image</td>
+    <td>Hough lines transformed</td>
+    <td>Hough lines trimmed</td>
+  </tr>
+  <tr>
+    <th><img src="./output_images/ines1_undistorted.jpg" width="70%"></th>
+    <th><img src="./output_images/ines1_drawHoughlines.jpg" width="70%"></th>
+    <th><img src="./output_images/ines1_drawHoughlines.jpg" width="70%"></th>
+  </tr>
+  <tr>
     <th><img src="./output_images/ines2_drawHoughlines.jpg" width="70%"></th>
     <th><img src="./output_images/ines2_drawHoughlines.jpg" width="70%"></th>
     <th><img src="./output_images/ines2_drawHoughlines.jpg" width="70%"></th>
   </tr>
   <tr>
-    <td>Jill</td>
-    <td>Smith</td>
-    <td>50</td>
+    <th><img src="./output_images/test1_undistorted.jpg" width="70%"></th>
+    <th><img src="./output_images/test1_drawHoughlines.jpg" width="70%"></th>
+    <th><img src="./output_images/test1_drawHoughlines.jpg" width="70%"></th>
   </tr>
   <tr>
-    <td>Eve</td>
-    <td>Jackson</td>
-    <td>94</td>
+    <th><img src="./output_images/test2_undistorted.jpg" width="70%"></th>
+    <th><img src="./output_images/test2_drawHoughlines.jpg" width="70%"></th>
+    <th><img src="./output_images/test2_drawHoughlines.jpg" width="70%"></th>
   </tr>
   <tr>
-    <td>John</td>
-    <td>Doe</td>
-    <td>80</td>
+    <th><img src="./output_images/test3_undistorted.jpg" width="70%"></th>
+    <th><img src="./output_images/test3_drawHoughlines.jpg" width="70%"></th>
+    <th><img src="./output_images/test3_drawHoughlines.jpg" width="70%"></th>
+  </tr>
+  <tr>
+    <th><img src="./output_images/test4_undistorted.jpg" width="70%"></th>
+    <th><img src="./output_images/test4_drawHoughlines.jpg" width="70%"></th>
+    <th><img src="./output_images/test4_drawHoughlines.jpg" width="70%"></th>
+  </tr>
+  <tr>
+    <th><img src="./output_images/test5_undistorted.jpg" width="70%"></th>
+    <th><img src="./output_images/test5_drawHoughlines.jpg" width="70%"></th>
+    <th><img src="./output_images/test5_drawHoughlines.jpg" width="70%"></th>
+  </tr>
+  <tr>
+    <th><img src="./output_images/test6_undistorted.jpg" width="70%"></th>
+    <th><img src="./output_images/test6_drawHoughlines.jpg" width="70%"></th>
+    <th><img src="./output_images/test6_drawHoughlines.jpg" width="70%"></th>
   </tr>
 </table>
 
