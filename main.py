@@ -350,9 +350,11 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
         out_path = os.path.join(outdir, name + '_bin' + '.jpg')
         cv2.imwrite(out_path, proc_img)
 
-    # Get Hough lines, draw lines on image, and save results.
+    # Get Hough lines, draw lines on image, trim to ROI, and save results.
     lines = hough_lines(proc_img) # returns numpy.ndarray of shape (x, 1, 4)
     proc_img = draw_lines(proc_img, lines)
+    vertices = np.array([[tl_src, tr_src, br_src, bl_src]], dtype=np.int32)
+    proc_img = region_of_interest(proc_img, vertices)
     if save_interm_results:
         cv2.imshow('img', proc_img)
         cv2.waitKey(500)

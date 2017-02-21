@@ -24,7 +24,7 @@ and vehicle position. (Not Done)
 [image6]: ./examples/example_output.jpg "Output"
 [video1]: ./project_video.mp4 "Video"
 
-[t1p1_link]: https://github.com/blakejacquot/udacity_SDC_T1P1_LaneFinding
+[t1p1_link]: https://github.com/blakejacquot/udacity_SDC_T1P1_LaneFinding/blob/master/P1.ipynb
 
 
 ##[Rubric](https://review.udacity.com/#!/rubrics/571/view) Responses
@@ -121,6 +121,20 @@ tr = top right, bl = bottom left
 
 ####4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
+To identify lane-line pixels, start with a Hough transformation to ... Next crop the binary
+image with Hough lines down to the ROI specified by the perspective transformation.
+
+After Hough transformation and cropping:
+![](./output_images/ines2_drawHoughlines.jpg)
+
+After Hough transformation, cropping, and perspective transformation:
+![](./output_images/ines2_drawHoughlines.jpg)
+
+
+-Do hough transform
+-Crop to ROI
+-Fit points on left
+-Fit points on right
 
 
 
