@@ -112,10 +112,12 @@ After choosing the source points for the transform, I sanity-checked results by 
 the resulting region of interest on straight lane lines and the transform of this image.
 
 Undistorted image with source points drawn:
+
 <img src="./output_images/test1_drawROI.jpg" width="70%">
 
 
 Transformed image:
+
 <img src="./output_images/ines1_perspectivetransformed_drawROI.jpg" width="70%">
 
 
@@ -136,10 +138,12 @@ To identify lane-line pixels, start with a Hough transformation to ... Next crop
 image with Hough lines down to the ROI specified by the perspective transformation.
 
 After Hough transformation and cropping:
+
 <img src="./output_images/ines2_drawHoughlines.jpg" width="70%">
 
 
 After Hough transformation, cropping, and perspective transformation:
+
 <img src="./output_images/ines2_drawHoughlines.jpg" width="70%">
 
 
