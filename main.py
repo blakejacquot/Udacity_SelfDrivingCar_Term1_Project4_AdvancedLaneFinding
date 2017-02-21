@@ -323,13 +323,23 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
 
     # Draw the region of interest on undistorted image and save results.
     proc_img_temp = proc_img.copy()
-    img_roi = draw_lines(proc_img_temp, lines)
+    proc_img_temp = draw_lines(proc_img_temp, lines)
     if save_interm_results:
         cv2.imshow('img', proc_img_temp)
         cv2.waitKey(500)
         cv2.destroyAllWindows()
         out_path = os.path.join(outdir, name + '_drawROI' + '.jpg')
-        cv2.imwrite(out_path, img_roi)
+        cv2.imwrite(out_path, proc_img_temp)
+
+    # Make perspective transformed image from region of interest image and save results
+    M, Minv = get_warp_params(img, src, dst)
+    proc_img_temp = warper(proc_img_temp, M)
+    if save_interm_results:
+        cv2.imshow('img', proc_img_temp)
+        cv2.waitKey(500)
+        cv2.destroyAllWindows()
+        out_path = os.path.join(outdir, name + '_perspectivetransformed_drawROI' + '.jpg')
+        cv2.imwrite(out_path, proc_img_temp)
 
     # Make binary image and save results.
     proc_img = make_binary_image(proc_img)

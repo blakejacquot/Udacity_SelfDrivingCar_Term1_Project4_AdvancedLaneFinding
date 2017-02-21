@@ -24,6 +24,7 @@ and vehicle position. (Not Done)
 [image6]: ./examples/example_output.jpg "Output"
 [video1]: ./project_video.mp4 "Video"
 
+[t1p1_link]: https://github.com/blakejacquot/udacity_SDC_T1P1_LaneFinding
 
 
 ##[Rubric](https://review.udacity.com/#!/rubrics/571/view) Responses
@@ -86,11 +87,7 @@ Code for making binary image is in `make_binary_image` function of file `main.py
 Here is an example of my output for this step:
 
 Binary image
-![alt text][test_2_bin]
 ![](./output_images/test2_bin.jpg)
-
-
-
 
 ####3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
@@ -104,16 +101,13 @@ After choosing the source points for transform, I sanity-checked results by look
 the resulting region of interest:
 ![](./output_images/test1_drawROI.jpg)
 
-An example of a transformed image is:
-
-
 Sanity check that straight lines are transformed as straight lines.
 
-Undistorted image:
-![](./test_images/straight_lines1.jpg)
+Undistorted image with source points drawn
+![](./test_images/ines1_drawROI.jpg)
 
 Transformed image:
-![](./output_images/ines1_perspectivetransformed.jpg)
+![](./output_images/ines1_perspectivetransformed_drawROI.jpg)
 
 I used the following source and destination points:
 
@@ -126,10 +120,25 @@ I used the following source and destination points:
 
 tr = top right, bl = bottom left
 
-
-
-
 ####4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
+
+
+
+
+TBD
+TBD
+TBD
+TBD
+TBD
+TBD
+TBD
+TBD
+TBD
+TBD
+TBD
+TBD
+
+
 
 I verified that my perspective transform was working as expected by drawing the `src` and
 `dst` points onto a test image and its warped counterpart to verify that the lines appear
