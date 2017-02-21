@@ -107,7 +107,7 @@ Undistorted image with source points drawn
 ![](./test_images/ines1_drawROI.jpg)
 
 Transformed image:
-![](./output_images/ines1_perspectivetransformed.jpg)
+![](./output_images/ines1_perspectivetransformed_drawROI.jpg)
 
 I used the following source and destination points:
 

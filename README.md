@@ -97,14 +97,13 @@ function. `get_warp_params` calculates the source and destination points for the
 Source points are selected to crop the original image to the area containing probably lane
 lines.
 
-After choosing the source points for transform, I sanity-checked results by looking at
-the resulting region of interest:
-![](./output_images/test1_drawROI.jpg)
-
 Sanity check that straight lines are transformed as straight lines.
 
-Undistorted image with source points drawn
-![](./test_images/ines1_drawROI.jpg)
+After choosing the source points for the transform, I sanity-checked results by looking at
+the resulting region of interest on straight lane lines and the transform of this image.
+
+Undistorted image with source points drawn:
+![](./output_images/test1_drawROI.jpg)
 
 Transformed image:
 ![](./output_images/ines1_perspectivetransformed_drawROI.jpg)
