@@ -375,12 +375,12 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
     bl = [0,img_size[1]] # bottom right
 
     # Define dst matrix for warping Udacity
-    tl = [0,0] # top left
-    tr = [img_size[0] + 100,0] # bottom left
-    br = [img_size[0],img_size[1]] # top right
-    bl = [0 + 100,img_size[1]] # bottom right OK
+    tl_dst = [320, 0] # top left
+    tr_dst = [960, 0] # bottom left
+    br_dst = [960, 720] # top right
+    bl_dst = [320, 720] # bottom right OK
 
-    dst = np.float32([[tl, tr, br, bl]])
+    dst = np.float32([[tl_dst, tr_dst, br_dst, bl_dst]])
 
 
 
