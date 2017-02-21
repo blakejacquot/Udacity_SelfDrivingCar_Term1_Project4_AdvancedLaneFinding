@@ -137,15 +137,12 @@ tr = top right, bl = bottom left
 To identify lane-line pixels, start with a Hough transformation to ... Next crop the binary
 image with Hough lines down to the ROI specified by the perspective transformation.
 
-After Hough transformation and cropping:
+After Hough transformation and cropping to ROI:
 
 <img src="./output_images/ines2_drawHoughlines.jpg" width="70%">
 
 
-After Hough transformation, cropping, and perspective transformation:
-
-<img src="ines2_Hough_perspectivetransformed.jpg" width="70%">
-
+Next do the perspective transformation and examine results:
 
 
 
@@ -154,8 +151,8 @@ After Hough transformation, cropping, and perspective transformation:
 <table style="width:100%">
   <tr>
     <td>Unistorted Image</td>
-    <td>Hough lines transformed</td>
-    <td>Hough lines trimmed</td>
+    <td>Hough lines</td>
+    <td>Hough lines perspective transformed</td>
   </tr>
   <tr>
     <th><img src="./output_images/ines1_undistorted.jpg" width="70%"></th>
@@ -198,15 +195,6 @@ After Hough transformation, cropping, and perspective transformation:
     <th><img src="./output_images/test6_drawHoughlines_transform.jpg" width="70%"></th>
   </tr>
 </table>
-
-
-
-
-
-
-<img src="./output_images/ines2_drawHoughlines.jpg" width="70%">
-<img src="ines2_Hough_perspectivetransformed.jpg" width="70%">
-
 
 
 -Do hough transform

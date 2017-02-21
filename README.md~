@@ -160,42 +160,42 @@ After Hough transformation, cropping, and perspective transformation:
   <tr>
     <th><img src="./output_images/ines1_undistorted.jpg" width="70%"></th>
     <th><img src="./output_images/ines1_drawHoughlines.jpg" width="70%"></th>
-    <th><img src="./output_images/ines1_drawHoughlines.jpg" width="70%"></th>
+    <th><img src="./output_images/ines1_drawHoughlines_transform.jpg" width="70%"></th>
   </tr>
   <tr>
+    <th><img src="./output_images/ines2_undistorted.jpg" width="70%"></th>
     <th><img src="./output_images/ines2_drawHoughlines.jpg" width="70%"></th>
-    <th><img src="./output_images/ines2_drawHoughlines.jpg" width="70%"></th>
-    <th><img src="./output_images/ines2_drawHoughlines.jpg" width="70%"></th>
+    <th><img src="./output_images/ines2_drawHoughlines_transform.jpg" width="70%"></th>
   </tr>
   <tr>
     <th><img src="./output_images/test1_undistorted.jpg" width="70%"></th>
     <th><img src="./output_images/test1_drawHoughlines.jpg" width="70%"></th>
-    <th><img src="./output_images/test1_drawHoughlines.jpg" width="70%"></th>
+    <th><img src="./output_images/test1_drawHoughlines_transform.jpg" width="70%"></th>
   </tr>
   <tr>
     <th><img src="./output_images/test2_undistorted.jpg" width="70%"></th>
     <th><img src="./output_images/test2_drawHoughlines.jpg" width="70%"></th>
-    <th><img src="./output_images/test2_drawHoughlines.jpg" width="70%"></th>
+    <th><img src="./output_images/test2_drawHoughlines_transform.jpg" width="70%"></th>
   </tr>
   <tr>
     <th><img src="./output_images/test3_undistorted.jpg" width="70%"></th>
     <th><img src="./output_images/test3_drawHoughlines.jpg" width="70%"></th>
-    <th><img src="./output_images/test3_drawHoughlines.jpg" width="70%"></th>
+    <th><img src="./output_images/test3_drawHoughlines_transform.jpg" width="70%"></th>
   </tr>
   <tr>
     <th><img src="./output_images/test4_undistorted.jpg" width="70%"></th>
     <th><img src="./output_images/test4_drawHoughlines.jpg" width="70%"></th>
-    <th><img src="./output_images/test4_drawHoughlines.jpg" width="70%"></th>
+    <th><img src="./output_images/test4_drawHoughlines_transform.jpg" width="70%"></th>
   </tr>
   <tr>
     <th><img src="./output_images/test5_undistorted.jpg" width="70%"></th>
     <th><img src="./output_images/test5_drawHoughlines.jpg" width="70%"></th>
-    <th><img src="./output_images/test5_drawHoughlines.jpg" width="70%"></th>
+    <th><img src="./output_images/test5_drawHoughlines_transform.jpg" width="70%"></th>
   </tr>
   <tr>
     <th><img src="./output_images/test6_undistorted.jpg" width="70%"></th>
     <th><img src="./output_images/test6_drawHoughlines.jpg" width="70%"></th>
-    <th><img src="./output_images/test6_drawHoughlines.jpg" width="70%"></th>
+    <th><img src="./output_images/test6_drawHoughlines_transform.jpg" width="70%"></th>
   </tr>
 </table>
 
