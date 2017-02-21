@@ -153,9 +153,9 @@ After Hough transformation, cropping, and perspective transformation:
 
 <table style="width:100%">
   <tr>
-    <th>Firstname</th>
-    <th>Lastname</th>
-    <th>Age</th>
+    <th><img src="./output_images/ines2_drawHoughlines.jpg" width="70%"></th>
+    <th><img src="./output_images/ines2_drawHoughlines.jpg" width="70%"></th>
+    <th><img src="./output_images/ines2_drawHoughlines.jpg" width="70%"></th>
   </tr>
   <tr>
     <td>Jill</td>
