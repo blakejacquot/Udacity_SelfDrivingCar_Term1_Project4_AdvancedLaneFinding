@@ -56,10 +56,12 @@ distortion correction to the test image using the `cv2.undistort()` function and
 obtained this result:
 
 Original image
+
 <img src="./camera_cal/calibration1.jpg" width="70%">
 
 
 Undistorted image
+
 <img src="./output_images/calibration1_undistorted.jpg" width="70%">
 
 ---
@@ -70,10 +72,12 @@ Read in calibration parameters from pickle file and use `undistort_image` functi
 file `main.py`. The undistortion is subtle, but present.
 
 Original image
+
 <img src="./test_images/test2.jpg" width="70%">
 
 
 Undistorted image
+
 <img src="./output_images/test2_undistorted.jpg" width="70%">
 
 
@@ -90,6 +94,7 @@ Code for making binary image is in `make_binary_image` function of file `main.py
 Here is an example of my output for this step:
 
 Binary image
+
 <img src="./output_images/test2_bin.jpg" width="70%">
 
 
