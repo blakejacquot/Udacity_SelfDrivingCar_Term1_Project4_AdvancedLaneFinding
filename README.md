@@ -106,11 +106,13 @@ the resulting region of interest:
 
 An example of a transformed image is:
 
-Transformed image
-![](./output_images/test2_perspectivetransformed.jpg)
 
 Sanity check that straight lines are transformed as straight lines.
+
+Undistorted image:
 ![](./test_images/straight_lines1.jpg)
+
+Transformed image:
 ![](./output_images/ines1_perspectivetransformed.jpg)
 
 I used the following source and destination points:
@@ -123,6 +125,9 @@ I used the following source and destination points:
 | 720, 450 tr   | 960, 0        |
 
 tr = top right, bl = bottom left
+
+
+
 
 ####4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 

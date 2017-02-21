@@ -75,7 +75,6 @@ def undistort_image(objpoints, imgpoints, img):
     Returns:
         undistorted_img:
     """
-    print(img.shape)
     gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints,
         gray.shape[::-1], None, None)
@@ -144,8 +143,6 @@ def region_of_interest(img, vertices):
     masked_image = cv2.bitwise_and(img, mask)
     return masked_image
 
-
-
 def get_warp_params(img, src, dst):
     """
     Docstring
@@ -176,40 +173,6 @@ def unwarp(img, Minv):
     return cv2.warpPerspective(img,Minv,img_size)
     return img
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def draw_lines(img, lines, color=[255, 0, 0], thickness=2):
     """
     Args:
@@ -238,7 +201,6 @@ def draw_lines(img, lines, color=[255, 0, 0], thickness=2):
     this function with the weighted_img() function below
 
     """
-    print(lines)
     #line_image = np.copy(img)*0 # Blank image on which to draw lines.
     line_image = img
     shape_img = img.shape
@@ -265,13 +227,6 @@ def hough_lines(img, rho = 3, theta = np.pi/180, threshold = 10,
         minLineLength=min_line_len, maxLineGap=max_line_gap)
     return lines
 
-
-
-
-
-
-
-
 def mark_lane_pixels():
     """
     Docstring
@@ -296,9 +251,6 @@ def write_annotated_image():
     """
     pass
 
-
-
-
 def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
     outdir = ''):
     """ Process an image pipline on an image
@@ -310,10 +262,10 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
 
     Returns:
 
-    Compute the camera calibration matrix and distortion coefficients given a set of
+    1. Compute the camera calibration matrix and distortion coefficients given a set of
     chessboard images.
 
-    Apply a distortion correction to raw images.
+    2. Apply a distortion correction to raw images.
 
     Use color transforms, gradients, etc., to create a thresholded binary image.
 
@@ -328,35 +280,21 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
     Output visual display of the lane boundaries and numerical estimation of lane
     curvature and vehicle position.
     """
-    #print(objpoints, imgpoints)
-    #print(type(objpoints), type(imgpoints))
 
+    # Display original image
     cv2.imshow('img', img)
     cv2.waitKey(500)
 
-
-    # Undistort image
+    # Undistort image and save results.
     proc_img = undistort_image(objpoints, imgpoints, img)
     if save_interm_results:
         cv2.imshow('img', proc_img)
         cv2.waitKey(500)
         cv2.destroyAllWindows()
-        print(name)
         out_path = os.path.join(outdir, name + '_undistorted' + '.jpg')
         cv2.imwrite(out_path, proc_img)
 
-
-#     Mask image
-#     imshape = img.shape
-#     tl = (550, 450) # top left
-#     tr = (720, 450) # top right
-#     br = (1150, imshape[0]-50) # bottom right
-#     bl = (150,imshape[0]-50) # bottom left
-#     vertices = np.array([[tl, tr, br, bl]], dtype=np.int32)
-#     print('binvert', vertices)
-#     proc_img = region_of_interest(proc_img, vertices)
-
-
+    # Calculate parameters for later use.
     img_shape = img.shape
     img_size = (img_shape[1],img_shape[0])
 
@@ -368,21 +306,13 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
     bl_src = (225,img_shape[0] - offset_for_obscuration) # bottom left
     src = np.float32([[tl_src, tr_src, br_src, bl_src]])
 
-    # Define dst points for warping BCJ
-    tl = [0,0] # top left
-    tr = [img_size[0],0] # bottom left
-    br = [img_size[0],img_size[1]] # top right
-    bl = [0,img_size[1]] # bottom right
-
-    # Define dst matrix for warping Udacity
+    # Define dst points for transform
     tl_dst = [320, 0] # top left
     tr_dst = [960, 0] # bottom left
     br_dst = [960, 720] # top right
     bl_dst = [320, 720] # bottom right OK
 
     dst = np.float32([[tl_dst, tr_dst, br_dst, bl_dst]])
-
-
 
     # Draw region of interest on image
     lines = np.zeros((4,1,4))
@@ -391,19 +321,17 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
     lines[2,0,:] = np.array([br_src[0], br_src[1], bl_src[0], bl_src[1]]) #br, bl
     lines[3,0,:] = np.array([tl_src[0], tl_src[1], bl_src[0], bl_src[1]]) #bl, tl
 
-    proc_img = draw_lines(proc_img, lines)
+    # Draw the region of interest on undistorted image and save results.
+    proc_img_temp = proc_img.copy()
+    img_roi = draw_lines(proc_img_temp, lines)
     if save_interm_results:
-        cv2.imshow('img', proc_img)
+        cv2.imshow('img', proc_img_temp)
         cv2.waitKey(500)
         cv2.destroyAllWindows()
         out_path = os.path.join(outdir, name + '_drawROI' + '.jpg')
-        cv2.imwrite(out_path, proc_img)
+        cv2.imwrite(out_path, img_roi)
 
-
-
-
-
-    # Make binary image
+    # Make binary image and save results.
     proc_img = make_binary_image(proc_img)
     if save_interm_results:
         cv2.imshow('img', proc_img)
@@ -412,47 +340,15 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
         out_path = os.path.join(outdir, name + '_bin' + '.jpg')
         cv2.imwrite(out_path, proc_img)
 
-
-    # Get Hough lines and draw lines on image
+    # Get Hough lines, draw lines on image, and save results.
     lines = hough_lines(proc_img) # returns numpy.ndarray of shape (x, 1, 4)
-    print(type(lines))
-    print(lines.shape)
-    temp = lines[0]
-    print(' ')
-    print(temp) # numpy.ndarray of shape (1, 4)
-    print(temp.shape)
-    print(type(temp))
-
-
-    print(' ')
-    temp2 = temp[0] # numpy.ndarray of shape (4,)
-    print(temp2)
-    print(type(temp2))
-    print(temp2.shape)
-    print(temp2[0])
-
-
-
-
-    #cv2.imshow('img', proc_img)
-    #cv2.waitKey(500)
-    #cv2.destroyAllWindows()
-
-
-
-    # Draw lines on image
-    lines = np.zeros((1,1,4))
-    lines[0,0,:] = np.array([0, 0, 700, 700])
-    print(lines)
-    print(lines.shape)
     proc_img = draw_lines(proc_img, lines)
     if save_interm_results:
         cv2.imshow('img', proc_img)
         cv2.waitKey(500)
         cv2.destroyAllWindows()
-        out_path = os.path.join(outdir, name + '_drawlines' + '.jpg')
+        out_path = os.path.join(outdir, name + '_drawHoughlines' + '.jpg')
         cv2.imwrite(out_path, proc_img)
-
 
     # Make perspective transformed image
     M, Minv = get_warp_params(img, src, dst)
