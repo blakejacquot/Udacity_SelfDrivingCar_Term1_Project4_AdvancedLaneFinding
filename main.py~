@@ -353,7 +353,8 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
     # Get Hough lines, draw lines on image, trim to ROI, and save results.
     lines = hough_lines(proc_img) # returns numpy.ndarray of shape (x, 1, 4)
     proc_img = draw_lines(proc_img, lines)
-    proc_img = region_of_interest(proc_img, [100, 200, 0, 300])
+    vertices = np.array([[tl_src, tr_src, br_src, bl_src]], dtype=np.int32)
+    proc_img = region_of_interest(proc_img, vertices)
     if save_interm_results:
         cv2.imshow('img', proc_img)
         cv2.waitKey(500)
@@ -368,7 +369,7 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
         cv2.imshow('img', proc_img)
         cv2.waitKey(500)
         cv2.destroyAllWindows()
-        out_path = os.path.join(outdir, name + '_perspectivetransformed' + '.jpg')
+        out_path = os.path.join(outdir, name + '_Hough_perspectivetransformed' + '.jpg')
         cv2.imwrite(out_path, proc_img)
 
 #    masked_canny_blur_gray = region_of_interest(canny_blur_gray, vertices)
