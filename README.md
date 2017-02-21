@@ -100,6 +100,10 @@ function. `get_warp_params` calculates the source and destination points for the
 Source points are selected to crop the original image to the area containing probably lane
 lines.
 
+After choosing the source points for transform, I sanity-checked results by looking at
+the resulting region of interest:
+![](./output_images/test1_drawROI.jpg)
+
 An example of a transformed image is:
 
 Transformed image

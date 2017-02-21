@@ -146,35 +146,10 @@ def region_of_interest(img, vertices):
 
 
 
-def get_warp_params(img):
+def get_warp_params(img, src, dst):
     """
     Docstring
     """
-
-    img_shape = img.shape
-    img_size = (img_shape[1],img_shape[0])
-
-    # Define src matrix
-    vert1 = (550, 450) # top left
-    vert2 = (720, 450) # top right
-    vert3 = (1150, img_shape[0]-50) # bottom right
-    vert4 = (150,img_shape[0]-50) # bottom left
-    src = np.float32([[vert1, vert2, vert3, vert4]])
-
-    # Define dst matrix for warping BCJ
-    vert1 = [0,0] # top left
-    vert2 = [img_size[0],0] # bottom left
-    vert3 = [img_size[0],img_size[1]] # top right
-    vert4 = [0,img_size[1]] # bottom right
-
-    # Define dst matrix for warping Udacity
-    vert1 = [0,0] # top left
-    vert2 = [img_size[0] + 100,0] # bottom left
-    vert3 = [img_size[0],img_size[1]] # top right
-    vert4 = [0 + 100,img_size[1]] # bottom right OK
-
-
-    dst = np.float32([[vert1, vert2, vert3, vert4]])
 
     # Display info
     print('src', src)
@@ -201,6 +176,102 @@ def unwarp(img, Minv):
     return cv2.warpPerspective(img,Minv,img_size)
     return img
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def draw_lines(img, lines, color=[255, 0, 0], thickness=2):
+    """
+    Args:
+      img: Color image on to draw lines.
+      lines: numpy.ndarray of size (x, 1, 4). The line points x1,y1,x2,y2 are numpy.ndarray
+        of size (4,)
+      color: Color of superimposed lines.
+      thickness: Thickness of lines (in pixels?).
+
+    Returns:
+      TBD
+
+    NOTE: this is the function you might want to use as a starting point once you want to
+    average/extrapolate the line segments you detect to map out the full
+    extent of the lane (going from the result shown in raw-lines-example.mp4
+    to that shown in P1_example.mp4).
+
+    Think about things like separating line segments by their
+    slope ((y2-y1)/(x2-x1)) to decide which segments are part of the left
+    line vs. the right line.  Then, you can average the position of each of
+    the lines and extrapolate to the top and bottom of the lane.
+
+    This function draws `lines` with `color` and `thickness`.
+    Lines are drawn on the image inplace (mutates the image).
+    If you want to make the lines semi-transparent, think about combining
+    this function with the weighted_img() function below
+
+    """
+    print(lines)
+    #line_image = np.copy(img)*0 # Blank image on which to draw lines.
+    line_image = img
+    shape_img = img.shape
+    x_max = shape_img[1]
+    for line in lines:
+        for x1,y1,x2,y2 in line:
+            x1 = int(x1)
+            y1 = int(y1)
+            x2 = int(x2)
+            y2 = int(y2)
+            cv2.line(line_image, (x1, y1), (x2, y2), color, thickness)
+    return line_image
+
+def hough_lines(img, rho = 3, theta = np.pi/180, threshold = 10,
+    min_line_len = 20, max_line_gap = 50):
+    """
+    `img` should be the output of a Canny transform.
+
+    Returns
+      line_img: Image with hough lines drawn.
+      lines: Hough lines from the transform of form x1,y1,x2,y2.
+    """
+    lines = cv2.HoughLinesP(img, rho, theta, threshold, np.array([]),
+        minLineLength=min_line_len, maxLineGap=max_line_gap)
+    return lines
+
+
+
+
+
+
+
+
 def mark_lane_pixels():
     """
     Docstring
@@ -224,6 +295,9 @@ def write_annotated_image():
     Docstring
     """
     pass
+
+
+
 
 def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
     outdir = ''):
@@ -274,13 +348,60 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
 
 #     Mask image
 #     imshape = img.shape
-#     vert1 = (550, 450) # top left
-#     vert2 = (720, 450) # top right
-#     vert3 = (1150, imshape[0]-50) # bottom right
-#     vert4 = (150,imshape[0]-50) # bottom left
-#     vertices = np.array([[vert1, vert2, vert3, vert4]], dtype=np.int32)
+#     tl = (550, 450) # top left
+#     tr = (720, 450) # top right
+#     br = (1150, imshape[0]-50) # bottom right
+#     bl = (150,imshape[0]-50) # bottom left
+#     vertices = np.array([[tl, tr, br, bl]], dtype=np.int32)
 #     print('binvert', vertices)
 #     proc_img = region_of_interest(proc_img, vertices)
+
+
+    img_shape = img.shape
+    img_size = (img_shape[1],img_shape[0])
+
+    # Define src points for transform
+    offset_for_obscuration = 50
+    tl_src = (585, 450) # top left
+    tr_src = (720, 450) # top right
+    br_src = (1150, img_shape[0] - offset_for_obscuration) # bottom right
+    bl_src = (225,img_shape[0] - offset_for_obscuration) # bottom left
+    src = np.float32([[tl_src, tr_src, br_src, bl_src]])
+
+    # Define dst points for warping BCJ
+    tl = [0,0] # top left
+    tr = [img_size[0],0] # bottom left
+    br = [img_size[0],img_size[1]] # top right
+    bl = [0,img_size[1]] # bottom right
+
+    # Define dst matrix for warping Udacity
+    tl = [0,0] # top left
+    tr = [img_size[0] + 100,0] # bottom left
+    br = [img_size[0],img_size[1]] # top right
+    bl = [0 + 100,img_size[1]] # bottom right OK
+
+    dst = np.float32([[tl, tr, br, bl]])
+
+
+
+    # Draw region of interest on image
+    lines = np.zeros((4,1,4))
+    lines[0,0,:] = np.array([tl_src[0], tl_src[1], tr_src[0], tr_src[1]]) #tl, tr
+    lines[1,0,:] = np.array([br_src[0], br_src[1], tr_src[0], tr_src[1]]) #tr, br
+    lines[2,0,:] = np.array([br_src[0], br_src[1], bl_src[0], bl_src[1]]) #br, bl
+    lines[3,0,:] = np.array([tl_src[0], tl_src[1], bl_src[0], bl_src[1]]) #bl, tl
+
+    proc_img = draw_lines(proc_img, lines)
+    if save_interm_results:
+        cv2.imshow('img', proc_img)
+        cv2.waitKey(500)
+        cv2.destroyAllWindows()
+        out_path = os.path.join(outdir, name + '_drawROI' + '.jpg')
+        cv2.imwrite(out_path, proc_img)
+
+
+
+
 
     # Make binary image
     proc_img = make_binary_image(proc_img)
@@ -291,8 +412,50 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
         out_path = os.path.join(outdir, name + '_bin' + '.jpg')
         cv2.imwrite(out_path, proc_img)
 
+
+    # Get Hough lines and draw lines on image
+    lines = hough_lines(proc_img) # returns numpy.ndarray of shape (x, 1, 4)
+    print(type(lines))
+    print(lines.shape)
+    temp = lines[0]
+    print(' ')
+    print(temp) # numpy.ndarray of shape (1, 4)
+    print(temp.shape)
+    print(type(temp))
+
+
+    print(' ')
+    temp2 = temp[0] # numpy.ndarray of shape (4,)
+    print(temp2)
+    print(type(temp2))
+    print(temp2.shape)
+    print(temp2[0])
+
+
+
+
+    #cv2.imshow('img', proc_img)
+    #cv2.waitKey(500)
+    #cv2.destroyAllWindows()
+
+
+
+    # Draw lines on image
+    lines = np.zeros((1,1,4))
+    lines[0,0,:] = np.array([0, 0, 700, 700])
+    print(lines)
+    print(lines.shape)
+    proc_img = draw_lines(proc_img, lines)
+    if save_interm_results:
+        cv2.imshow('img', proc_img)
+        cv2.waitKey(500)
+        cv2.destroyAllWindows()
+        out_path = os.path.join(outdir, name + '_drawlines' + '.jpg')
+        cv2.imwrite(out_path, proc_img)
+
+
     # Make perspective transformed image
-    M, Minv = get_warp_params(img)
+    M, Minv = get_warp_params(img, src, dst)
     proc_img = warper(img, M)
     if save_interm_results:
         cv2.imshow('img', proc_img)
@@ -302,7 +465,6 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
         cv2.imwrite(out_path, proc_img)
 
 #    masked_canny_blur_gray = region_of_interest(canny_blur_gray, vertices)
-
 
 
 

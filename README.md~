@@ -105,6 +105,10 @@ An example of a transformed image is:
 Transformed image
 ![](./output_images/test2_perspectivetransformed.jpg)
 
+Sanity check that straight lines are transformed as straight lines.
+![](./test_images/straight_lines1.jpg)
+![](./output_images/ines1_perspectivetransformed.jpg)
+
 
 
 
