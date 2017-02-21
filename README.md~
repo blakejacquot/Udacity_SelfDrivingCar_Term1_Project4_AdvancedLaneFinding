@@ -131,6 +131,8 @@ After Hough transformation, cropping, and perspective transformation:
 ![](./output_images/ines2_drawHoughlines.jpg)
 
 
+<img src="./output_images/ines2_drawHoughlines.jpg" width="40%">
+
 -Do hough transform
 -Crop to ROI
 -Fit points on left
