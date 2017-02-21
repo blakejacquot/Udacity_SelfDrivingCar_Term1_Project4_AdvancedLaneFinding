@@ -362,14 +362,14 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
         out_path = os.path.join(outdir, name + '_drawHoughlines' + '.jpg')
         cv2.imwrite(out_path, proc_img)
 
-    # Make perspective transformed image
+    # Make perspective transformed image on the Hough image.
     M, Minv = get_warp_params(img, src, dst)
     proc_img = warper(proc_img, M)
     if save_interm_results:
         cv2.imshow('img', proc_img)
         cv2.waitKey(500)
         cv2.destroyAllWindows()
-        out_path = os.path.join(outdir, name + '_Hough_perspectivetransformed' + '.jpg')
+        out_path = os.path.join(outdir, name + '_drawHoughlines_transform' + '.jpg')
         cv2.imwrite(out_path, proc_img)
 
 #    masked_canny_blur_gray = region_of_interest(canny_blur_gray, vertices)
