@@ -145,13 +145,10 @@ After Hough transformation and cropping to ROI:
 Next do the perspective transformation and examine results:
 
 
-
-
-
 <table style="width:100%">
   <tr>
     <td>Unistorted Image</td>
-    <td>Hough lines</td>
+    <td>Hough lines cropped to ROI</td>
     <td>Hough lines perspective transformed</td>
   </tr>
   <tr>
