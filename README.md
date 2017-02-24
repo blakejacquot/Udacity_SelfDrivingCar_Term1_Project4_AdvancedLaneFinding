@@ -139,7 +139,7 @@ image with Hough lines down to the ROI specified by the perspective transformati
 
 After Hough transformation and cropping to ROI:
 
-<img src="./output_images/ines2_drawHoughlines.jpg" width="70%">
+<img src="./output_images/ines2_bin.jpg" width="70%">
 
 
 Next do the perspective transformation and examine results:
@@ -148,48 +148,48 @@ Next do the perspective transformation and examine results:
 <table style="width:100%">
   <tr>
     <td>Unistorted Image</td>
-    <td>Hough lines cropped to ROI</td>
-    <td>Hough lines perspective transformed</td>
+    <td>Binary image cropped to ROI</td>
+    <td>Binary image perspective transformed</td>
   </tr>
   <tr>
     <th><img src="./output_images/ines1_undistorted.jpg" width="70%"></th>
-    <th><img src="./output_images/ines1_drawHoughlines.jpg" width="70%"></th>
-    <th><img src="./output_images/ines1_drawHoughlines_transform.jpg" width="70%"></th>
+    <th><img src="./output_images/ines1_bin.jpg" width="70%"></th>
+    <th><img src="./output_images/ines1_bin_transform.jpg" width="70%"></th>
   </tr>
   <tr>
     <th><img src="./output_images/ines2_undistorted.jpg" width="70%"></th>
-    <th><img src="./output_images/ines2_drawHoughlines.jpg" width="70%"></th>
-    <th><img src="./output_images/ines2_drawHoughlines_transform.jpg" width="70%"></th>
+    <th><img src="./output_images/ines2_bin.jpg" width="70%"></th>
+    <th><img src="./output_images/ines2_bin_transform.jpg" width="70%"></th>
   </tr>
   <tr>
     <th><img src="./output_images/test1_undistorted.jpg" width="70%"></th>
-    <th><img src="./output_images/test1_drawHoughlines.jpg" width="70%"></th>
-    <th><img src="./output_images/test1_drawHoughlines_transform.jpg" width="70%"></th>
+    <th><img src="./output_images/test1_bin.jpg" width="70%"></th>
+    <th><img src="./output_images/test1_bin_transform.jpg" width="70%"></th>
   </tr>
   <tr>
     <th><img src="./output_images/test2_undistorted.jpg" width="70%"></th>
-    <th><img src="./output_images/test2_drawHoughlines.jpg" width="70%"></th>
-    <th><img src="./output_images/test2_drawHoughlines_transform.jpg" width="70%"></th>
+    <th><img src="./output_images/test2_bin.jpg" width="70%"></th>
+    <th><img src="./output_images/test2_bin_transform.jpg" width="70%"></th>
   </tr>
   <tr>
     <th><img src="./output_images/test3_undistorted.jpg" width="70%"></th>
-    <th><img src="./output_images/test3_drawHoughlines.jpg" width="70%"></th>
-    <th><img src="./output_images/test3_drawHoughlines_transform.jpg" width="70%"></th>
+    <th><img src="./output_images/test3_bin.jpg" width="70%"></th>
+    <th><img src="./output_images/test3_bin_transform.jpg" width="70%"></th>
   </tr>
   <tr>
     <th><img src="./output_images/test4_undistorted.jpg" width="70%"></th>
-    <th><img src="./output_images/test4_drawHoughlines.jpg" width="70%"></th>
-    <th><img src="./output_images/test4_drawHoughlines_transform.jpg" width="70%"></th>
+    <th><img src="./output_images/test4_bin.jpg" width="70%"></th>
+    <th><img src="./output_images/test4_bin_transform.jpg" width="70%"></th>
   </tr>
   <tr>
     <th><img src="./output_images/test5_undistorted.jpg" width="70%"></th>
-    <th><img src="./output_images/test5_drawHoughlines.jpg" width="70%"></th>
-    <th><img src="./output_images/test5_drawHoughlines_transform.jpg" width="70%"></th>
+    <th><img src="./output_images/test5_bin.jpg" width="70%"></th>
+    <th><img src="./output_images/test5_bin_transform.jpg" width="70%"></th>
   </tr>
   <tr>
     <th><img src="./output_images/test6_undistorted.jpg" width="70%"></th>
-    <th><img src="./output_images/test6_drawHoughlines.jpg" width="70%"></th>
-    <th><img src="./output_images/test6_drawHoughlines_transform.jpg" width="70%"></th>
+    <th><img src="./output_images/test6_bin.jpg" width="70%"></th>
+    <th><img src="./output_images/test6_bin_transform.jpg" width="70%"></th>
   </tr>
 </table>
 

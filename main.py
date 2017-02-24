@@ -454,28 +454,6 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
 
 
 
-    #proc_img = region_of_interest(proc_img, src)
-    #tl = (585, 450) # top left
-    #tr = (720, 450) # top right
-    #br = (1150, img_shape[0]) # bottom right
-    #bl = (225,img_shape[0]) # bottom left
-    #x,y
-    #tl = (0, 0) # top left
-    #tr = (img_shape[1], 0) # top right
-    #br = (0, img_shape[0]) # bottom right
-    #bl = (img_shape[1],img_shape[0]) # bottom left
-    #vertices = np.float32([[tl, tr, br, bl]])
-    #roi_image = region_of_interest(proc_img, vertices)
-    #if save_interm_results:
-    #    cv2.imshow('_binafterROI', proc_img)
-    #    cv2.waitKey(500)
-    #    cv2.destroyAllWindows()
-    #    out_path = os.path.join(outdir, name + '_binafterROI' + '.jpg')
-    #    cv2.imwrite(out_path, proc_img)
-
-
-
-
 
 ##     Get Hough lines, draw lines on image, trim to ROI, and save results.
 #     lines = hough_lines(proc_img) # returns numpy.ndarray of shape (x, 1, 4)
@@ -496,7 +474,7 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
         cv2.imshow('img', proc_img)
         cv2.waitKey(500)
         cv2.destroyAllWindows()
-        out_path = os.path.join(outdir, name + '_drawHoughlines_transform' + '.jpg')
+        out_path = os.path.join(outdir, name + '_bin_transform' + '.jpg')
         cv2.imwrite(out_path, proc_img)
 
 #    masked_canny_blur_gray = region_of_interest(canny_blur_gray, vertices)
