@@ -446,7 +446,7 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
     # Make binary image, crop to ROI, and save results.
     proc_img = make_binary_image(proc_img)
     if save_interm_results:
-        cv2.imshow('img', proc_img)
+        cv2.imshow('bin', proc_img)
         cv2.waitKey(500)
         cv2.destroyAllWindows()
         out_path = os.path.join(outdir, name + '_bin' + '.jpg')
@@ -470,13 +470,18 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
     # Make perspective transformed image on the Hough image.
     M, Minv = get_warp_params(img, src, dst)
     proc_img = warper(proc_img, M)
+    proc_img = proc_img * 255
     if save_interm_results:
-        cv2.imshow('img', proc_img)
+        cv2.imshow('bin_transform', proc_img)
         cv2.waitKey(500)
         cv2.destroyAllWindows()
         out_path = os.path.join(outdir, name + '_bin_transform' + '.jpg')
         cv2.imwrite(out_path, proc_img)
 
+    print('***')
+    print(type(proc_img))
+    print(np.amax(proc_img))
+    print(np.amin(proc_img))
 #    masked_canny_blur_gray = region_of_interest(canny_blur_gray, vertices)
 
 
