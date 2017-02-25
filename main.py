@@ -339,10 +339,10 @@ def make_binary_image(img):
     color_binary = np.zeros_like(combined)
     color_binary[(s_binary > 0) | (combined > 0)] = 1
 
-    color_binary = color_binary * 255
-
+    if np.amax(color_binary) < 200:
+        print('Scaling image')
+        color_binary = (color_binary / np.amax(color_binary)) * 255
     return color_binary
-
 
 
 def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
