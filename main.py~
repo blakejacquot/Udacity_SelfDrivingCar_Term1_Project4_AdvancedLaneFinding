@@ -7,7 +7,7 @@ import glob
 import os
 import math
 import numpy as np
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 #import matplotlib.image as mpimg
 #import math
 import pickle
@@ -341,7 +341,7 @@ def make_binary_image(img):
 
     if np.amax(color_binary) < 200:
         print('Scaling image')
-        color_binary = (color_binary / color_binary.amax) * 255
+        color_binary = (color_binary / np.amax(color_binary)) * 255
     return color_binary
 
 
@@ -480,11 +480,112 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
         cv2.imwrite(out_path, proc_img)
 
 
+
+
+    print(' ')
+    print(' ')
+    print(' ')
     mark_lane_pixels()
+
+    np.where(proc_img <= 100, proc_img, 0)
+    np.where(proc_img > 100, proc_img, 255)
+
+
+    img_shape = proc_img.shape
+    zero_right = proc_img.copy()
+    zero_left = proc_img.copy()
+    zero_right[0:img_shape[0], img_shape[1]/2:img_shape[1]] = 0
+    zero_left[0:img_shape[0], 0:img_shape[1]/2] = 0
+
+    # Get fit parameters for left lane
+    left_raw_all = np.nonzero(zero_right)
+    left_raw_x = left_raw_all[0]
+    left_raw_y = left_raw_all[1]
+    left_fit = np.polyfit(left_raw_x, left_raw_y, 2)
+
+    # Get fit parameters for right lane
+    right_raw_all = np.nonzero(zero_right)
+    right_raw_x = right_raw_all[0]
+    right_raw_y = right_raw_all[1]
+    right_fit = np.polyfit(right_raw_x, right_raw_y, 2)
+
+
+    # Color the pixels that we will fit to in order to ensure we're using correct ones.
+    temp = img.copy()
+    temp = temp * 0
+    print(temp.shape)
+    temp[left_raw_x, left_raw_y,0] = 100
+    temp[left_raw_x, left_raw_y,1] = 100
+    cv2.imshow('Found lane pixels', temp)
+    cv2.waitKey(2000)
+
+
+    # Make general fit line
+#    yvals = np.linspace(0, img_shape[0])  # to cover same y-range as image
+#    left_fit_x = left_fit[0]*yvals**2 + left_fit[1]*yvals + left_fit[2]
+#
+#    left_x = np.linspace(0, img_shape[1])
+#    left_y = left_fit[0]*yvals**2 + left_fit[1]*yvals + left_fit[2]
+#
+#    yvals = yvals.astype(int)
+#    print(yvals)
+#    print(type(yvals))
+#    left_fit_x = left_fit_x.astype(int)
+#    print(left_fit_x)
+#    print(type(left_fit_x))
+    x_vals = np.linspace(0, img_shape[0]-1)
+    x_vals = x_vals.astype(int)
+
+    left_fit_y = left_fit[0]*x_vals**2 + left_fit[1]*x_vals + left_fit[2]
+    left_fit_y = left_fit_y.astype(int)
+
+    right_fit_y = right_fit[0]*x_vals**2 + right_fit[1]*x_vals + right_fit[2]
+    right_fit_y = right_fit_y.astype(int)
+
+    #print(x_vals)
+    #print(left_fit_y)
+
+    # Plot fit line on image
+    #temp = img.copy()
+    #temp = temp * 0
+    #print(temp.shape)
+    #temp[x_vals, left_fit_y, 0] = 100
+    #temp[x_vals, left_fit_y, 1] = 100
+    #cv2.imshow('Found lane pixels', temp)
+    #cv2.waitKey(1000)
+
+
+    implot = plt.imshow(proc_img)
+    plt.plot(left_fit_y, x_vals, c='g', linewidth = 2)
+    plt.plot(right_fit_y, x_vals, c='g', linewidth = 2)
+    #plt.scatter(left_fit_y, x_vals, c='b', s = 40)
+    #plt.scatter(x_vals, right_fit_y, c='g', s = 40)
+    plt.show()
+
+
+
+
+
+    time.wait(500)
+
+    #fit left and right lane marker samples to 2nd order polynomial
+    LeftMarker.fit_values = np.polyfit(lefty, leftx, 2)
+    RightMarker.fit_values = np.polyfit(righty, rightx, 2)
+
+
+    if save_interm_results:
+        cv2.imshow('proc_img_left', zero_right)
+        cv2.waitKey(1500)
+        cv2.imshow('proc_img_right', zero_left)
+        cv2.waitKey(1500)
+        cv2.destroyAllWindows()
+
 
 
 
     calc_lane_curvature()
+
+
 
 
 
