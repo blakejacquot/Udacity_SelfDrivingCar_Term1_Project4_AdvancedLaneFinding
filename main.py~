@@ -154,14 +154,14 @@ def warper(img, M):
     """
     img_shape = img.shape
     img_size = (img_shape[1],img_shape[0])
-    img_warped = cv2.warpPerspective(img, M, img_size)
-    return img_warped
+    img_proc = cv2.warpPerspective(img, M, img_size)
+    return img_proc
 
-def unwarp(img, Minv):
-    img_shape = img.shape
-    img_size = (img_shape[1],img_shape[0])
-    return cv2.warpPerspective(img,Minv,img_size)
-    return img
+#def unwarp(img, Minv):
+#    img_shape = img.shape
+#    img_size = (img_shape[1],img_shape[0])
+#    return cv2.warpPerspective(img,Minv,img_size)
+#    return img
 
 def draw_lines(img, lines, color=[255, 0, 0], thickness=2):
     """
@@ -479,7 +479,10 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
 
 
     # Warp the blank back to original image space using inverse perspective matrix (Minv)
-    newwarp = cv2.warpPerspective(img_warp, Minv, (img_shape[1], img_shape[0]))
+    newwarp = warper(img_warp, Minv)
+
+
+
 
     f, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(24, 9))
 
@@ -608,28 +611,31 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
     #cv2.imshow('Found lane pixels', temp)
     #cv2.waitKey(1000)
 
-
-
-
     str1 = 'Radius of Curvature = 7159(m)'
     str2 = 'Vehicle is 0.17m left of center'
 
-
-
     # Create an image to draw the lines on
     warp_zero = np.zeros_like(bin_warp_img).astype(np.uint8)
-    color_warp = np.dstack((bin_warp_img, bin_warp_img, bin_warp_img))
+    color_warp = np.dstack((warp_zero, warp_zero, warp_zero))
+
+    print(x_vals)
+    print(left_fit_y)
 
     # Recast the x and y points into usable format for cv2.fillPoly()
-    pts_left = np.array([np.transpose(np.vstack([x_vals, left_fit_y]))])
-    pts_right = np.array([np.flipud(np.transpose(np.vstack([x_vals, right_fit_y])))])
+    pts_left = np.array([np.transpose(np.vstack([left_fit_y, x_vals]))])
+    pts_right = np.array([np.flipud(np.transpose(np.vstack([right_fit_y, x_vals])))])
     pts = np.hstack((pts_left, pts_right))
+
+    # Plot the re-cast points on the image to double check their integrity
+    print(type(pts_left), pts_left.size)
+    print(pts_left)
+
 
     # Draw the lane onto the warped blank image
     cv2.fillPoly(color_warp, np.int_([pts]), (0,255, 0))
 
     # Warp the blank back to original image space using inverse perspective matrix (Minv)
-    newwarp = cv2.warpPerspective(color_warp, Minv, (img_shape[1], img_shape[0]))
+    newwarp = warper(color_warp, Minv)
     # Combine the result with the original image
     orig_img = orig_img.astype(np.uint8)
     newwarp = newwarp.astype(np.uint8)
@@ -637,20 +643,7 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
     #plt.imshow(result)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-    f, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(24, 9))
+    f, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(1, 5, figsize=(24, 9))
     #f.tight_layout()
 
     ax1.imshow(orig_img)
@@ -664,14 +657,21 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
     ax3.plot(right_fit_y, x_vals, c='b', linewidth = 2)
     ax3.set_title('Undistorted, transformed binary')
 
-    ax4.imshow(result)
-    ax4.set_title('Lanes on image')
+    ax4.imshow(color_warp)
+    ax4.set_title('Lanes on binary image')
+
+    ax5.imshow(result)
+    ax5.set_title('Lanes on image')
 
     plt.show()
 
 
-    out_path = os.path.join(outdir, name + '_total_results' + '.jpg')
-    f.savefig(out_path, bbox_inches='tight')
+    print(outdir, name)
+    out_path = os.path.join(outdir, name + '_total_results' + '.png')
+    print(out_path)
+#    f.savefig(out_path)
+
+    f.savefig(out_path, bbox_inches='tight', format='png')
 
     #time.wait(500)
 
@@ -766,7 +766,7 @@ def main():
             img = cv2.imread(fname)
             ret_img = proc_pipeline(objpoints, imgpoints, img, outdir = dir_output_images)
             curr_name = fname[-10:-4]
-            out_pat, h = os.path.join(dir_output_images, curr_name + '.jpg')
+            out_path = os.path.join(dir_output_images, curr_name + '.jpg')
             cv2.imwrite(out_path, ret_img)
 
     if proc_pipeline_test_images == 1:
