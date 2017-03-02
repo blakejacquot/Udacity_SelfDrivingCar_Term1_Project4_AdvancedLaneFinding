@@ -154,14 +154,14 @@ def warper(img, M):
     """
     img_shape = img.shape
     img_size = (img_shape[1],img_shape[0])
-    img_warped = cv2.warpPerspective(img, M, img_size)
-    return img_warped
+    img_proc = cv2.warpPerspective(img, M, img_size)
+    return img_proc
 
-def unwarp(img, Minv):
-    img_shape = img.shape
-    img_size = (img_shape[1],img_shape[0])
-    return cv2.warpPerspective(img,Minv,img_size)
-    return img
+#def unwarp(img, Minv):
+#    img_shape = img.shape
+#    img_size = (img_shape[1],img_shape[0])
+#    return cv2.warpPerspective(img,Minv,img_size)
+#    return img
 
 def draw_lines(img, lines, color=[255, 0, 0], thickness=2):
     """
@@ -319,6 +319,12 @@ def make_binary_image(img):
     mag_binary = mag_thresh(img_blur_gray, sobel_kernel=ksize, mag_thresh=(200, 255))
     dir_binary = dir_threshold(img_blur_gray, sobel_kernel=ksize, thresh=(.95, 1.05))
 
+    gradx = abs_sobel_thresh(img_blur_gray, orient='x', sobel_kernel=ksize, thresh=(10, 255))
+    grady = abs_sobel_thresh(img_blur_gray, orient='y', sobel_kernel=ksize, thresh=(60, 255))
+    mag_binary = mag_thresh(img_blur_gray, sobel_kernel=ksize, mag_thresh=(40, 255))
+    dir_binary = dir_threshold(img_blur_gray, sobel_kernel=ksize, thresh=(.65, 1.05))
+
+
 
     # Combine all the thresholding information
     combined = np.zeros_like(dir_binary)
@@ -343,6 +349,31 @@ def make_binary_image(img):
         print('Scaling image')
         color_binary = (color_binary / np.amax(color_binary)) * 255
     return color_binary
+
+
+# Define a class to receive the characteristics of each line detection
+class Line():
+    def __init__(self):
+        # was the line detected in the last iteration?
+        self.detected = False
+        # x values of the last n fits of the line
+        self.recent_xfitted = []
+        #average x values of the fitted line over the last n iterations
+        self.bestx = None
+        #polynomial coefficients averaged over the last n iterations
+        self.best_fit = None
+        #polynomial coefficients for the most recent fit
+        self.current_fit = [np.array([False])]
+        #radius of curvature of the line in some units
+        self.radius_of_curvature = None
+        #distance in meters of vehicle center from the line
+        self.line_base_pos = None
+        #difference in fit coefficients between last and new fits
+        self.diffs = np.array([0,0,0], dtype='float')
+        #x values for detected line pixels
+        self.allx = None
+        #y values for detected line pixels
+        self.ally = None
 
 
 def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
@@ -381,6 +412,7 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
 
     # Undistort image and save results.
     proc_img = undistort_image(objpoints, imgpoints, img)
+    orig_img = proc_img
     if save_interm_results:
         cv2.imshow('img', proc_img)
         cv2.waitKey(500)
@@ -437,16 +469,40 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
 
     # Make perspective transformed image from region of interest image and save results
     M, Minv = get_warp_params(img, src, dst)
-    proc_img_temp = warper(proc_img_temp, M)
+    img_warp = warper(proc_img_temp, M)
     if save_interm_results:
-        cv2.imshow('img', proc_img_temp)
+        cv2.imshow('img', img_warp)
         cv2.waitKey(500)
         cv2.destroyAllWindows()
         out_path = os.path.join(outdir, name + '_perspectivetransformed_drawROI' + '.jpg')
         cv2.imwrite(out_path, proc_img_temp)
 
+
+    # Warp the blank back to original image space using inverse perspective matrix (Minv)
+    newwarp = warper(img_warp, Minv)
+
+
+
+
+    f, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(24, 9))
+
+    ax1.imshow(orig_img)
+    ax1.set_title('Undistorted original image')
+
+    ax2.imshow(img_warp, cmap = 'gray')
+    ax2.set_title('Warped image')
+
+    ax3.imshow(newwarp, cmap = 'gray')
+    ax3.set_title('De-warped image')
+
+    plt.show()
+
+
+
+
     # Make binary image, crop to ROI, and save results.
     proc_img = make_binary_image(proc_img)
+    bin_img = proc_img
     if save_interm_results:
         cv2.imshow('bin', proc_img)
         cv2.waitKey(500)
@@ -472,6 +528,7 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
     # Make perspective transformed image on the Hough image.
     M, Minv = get_warp_params(img, src, dst)
     proc_img = warper(proc_img, M)
+    bin_warp_img = proc_img
     if save_interm_results:
         cv2.imshow('bin_transform', proc_img)
         cv2.waitKey(500)
@@ -511,13 +568,13 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
 
 
     # Color the pixels that we will fit to in order to ensure we're using correct ones.
-    temp = img.copy()
-    temp = temp * 0
-    print(temp.shape)
-    temp[left_raw_x, left_raw_y,0] = 100
-    temp[left_raw_x, left_raw_y,1] = 100
-    cv2.imshow('Found lane pixels', temp)
-    cv2.waitKey(2000)
+    #temp = img.copy()
+    #temp = temp * 0
+    #print(temp.shape)
+    #temp[left_raw_x, left_raw_y,0] = 100
+    #temp[left_raw_x, left_raw_y,1] = 100
+    #cv2.imshow('Found lane pixels', temp)
+    #cv2.waitKey(2000)
 
 
     # Make general fit line
@@ -555,30 +612,98 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
     #cv2.waitKey(1000)
 
 
-    implot = plt.imshow(proc_img)
-    plt.plot(left_fit_y, x_vals, c='g', linewidth = 2)
-    plt.plot(right_fit_y, x_vals, c='g', linewidth = 2)
-    #plt.scatter(left_fit_y, x_vals, c='b', s = 40)
-    #plt.scatter(x_vals, right_fit_y, c='g', s = 40)
+
+
+    str1 = 'Radius of Curvature = 7159(m)'
+    str2 = 'Vehicle is 0.17m left of center'
+
+
+
+    # Create an image to draw the lines on
+    warp_zero = np.zeros_like(bin_warp_img).astype(np.uint8)
+    color_warp = np.dstack((bin_warp_img, bin_warp_img, bin_warp_img))
+
+    # Recast the x and y points into usable format for cv2.fillPoly()
+    pts_left = np.array([np.transpose(np.vstack([x_vals, left_fit_y]))])
+    pts_right = np.array([np.flipud(np.transpose(np.vstack([x_vals, right_fit_y])))])
+    pts = np.hstack((pts_left, pts_right))
+
+    # Draw the lane onto the warped blank image
+    cv2.fillPoly(color_warp, np.int_([pts]), (0,255, 0))
+
+    # Warp the blank back to original image space using inverse perspective matrix (Minv)
+    newwarp = warper(color_warp, Minv)
+    # Combine the result with the original image
+    orig_img = orig_img.astype(np.uint8)
+    newwarp = newwarp.astype(np.uint8)
+    result = cv2.addWeighted(orig_img, 1, newwarp, 0.3, 0)
+    #plt.imshow(result)
+
+
+    f, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(24, 9))
+    #f.tight_layout()
+
+    ax1.imshow(orig_img)
+    ax1.set_title('Undistorted original image')
+
+    ax2.imshow(bin_img, cmap = 'gray')
+    ax2.set_title('Undistorted binary')
+
+    ax3.imshow(bin_warp_img, cmap = 'gray')
+    ax3.plot(left_fit_y, x_vals, c='g', linewidth = 2)
+    ax3.plot(right_fit_y, x_vals, c='b', linewidth = 2)
+    ax3.set_title('Undistorted, transformed binary')
+
+    ax4.imshow(result)
+    ax4.set_title('Lanes on image')
+
     plt.show()
 
 
+    out_path = os.path.join(outdir, name + '_total_results' + '.jpg')
+    f.savefig(out_path, bbox_inches='tight')
+
+    #time.wait(500)
 
 
 
-    time.wait(500)
+
+#     f, axarr = plt.subplots(1, 3, figsize=(24, 9))
+#     axarr[0].im
+#
+# ax1.imshow(img, cmap='gray')
+# ax1.set_title('Pipeline Results', fontsize=40)
+#
+# # Plot up the data
+# ax2.plot(left_line.allx, left_line.ally, 'o', color='red')
+# ax2.plot(right_line.allx, right_line.ally, 'o', color='blue')
+# plt.xlim(0, 1280)
+# plt.ylim(0, 720)
+# ax2.plot(left_line.bestx, left_line.ally, color='green', linewidth=3)
+# ax2.plot(right_line.bestx, right_line.ally, color='green', linewidth=3)
+# plt.gca().invert_yaxis() # to visualize as we do the images
+# ax2.set_title('Line Fits', fontsize=40)
+# plt.subplots_adjust(left=0., right=1, top=0.9, bottom=0.)
+# f.savefig('output_images/line_fit_'+str(idx)+'.jpg')
+
+
+
+
+
+
+    #time.wait(500)
 
     #fit left and right lane marker samples to 2nd order polynomial
-    LeftMarker.fit_values = np.polyfit(lefty, leftx, 2)
-    RightMarker.fit_values = np.polyfit(righty, rightx, 2)
+    #LeftMarker.fit_values = np.polyfit(lefty, leftx, 2)
+    #RightMarker.fit_values = np.polyfit(righty, rightx, 2)
 
 
-    if save_interm_results:
-        cv2.imshow('proc_img_left', zero_right)
-        cv2.waitKey(1500)
-        cv2.imshow('proc_img_right', zero_left)
-        cv2.waitKey(1500)
-        cv2.destroyAllWindows()
+    #if save_interm_results:
+    #    cv2.imshow('proc_img_left', zero_right)
+    #    cv2.waitKey(1500)
+    #    cv2.imshow('proc_img_right', zero_left)
+    #    cv2.waitKey(1500)
+    #    cv2.destroyAllWindows()
 
 
 
