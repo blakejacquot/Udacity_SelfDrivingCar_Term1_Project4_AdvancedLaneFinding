@@ -375,6 +375,43 @@ class Line():
         #y values for detected line pixels
         self.ally = None
 
+def calc_curve_rad(left_fit_fofy, right_fit_fofy):
+
+    y_eval = 700
+
+
+
+    ym_per_pix = 30/720 # meters per pixel in y dimension
+    xm_per_pix = 3.7/700 # meters per pixel in x dimension
+
+    # Fit new polynomials to x,y in world space
+#    left_fit_fofx_cr = np.polyfit(ploty*ym_per_pix, leftx*xm_per_pix, 2)
+#    right_fit_fofx_cr = np.polyfit(ploty*ym_per_pix, rightx*xm_per_pix, 2)
+
+    # Calculate the new radii of curvature
+    left_curverad = ((1 + (2*left_fit_fofy[0]*y_eval*ym_per_pix + left_fit_fofy[1])**2)**1.5) / np.absolute(2*left_fit_fofy[0])
+    right_curverad = ((1 + (2*right_fit_fofy[0]*y_eval*ym_per_pix + right_fit_fofy[1])**2)**1.5) / np.absolute(2*right_fit_fofy[0])
+
+    # Now our radius of curvature is in meters
+    print(left_curverad, 'm', right_curverad, 'm')
+    # Example values: 632.1 m    626.2 m
+    return left_curverad, right_curverad
+
+
+def find_curvature(yvals, fitx):
+    # Define y-value where we want radius of curvature
+    # I'll choose the maximum y-value, corresponding to the bottom of the image
+    y_eval = np.max(yvals)
+    # Define conversions in x and y from pixels space to meters
+    ym_per_pix = 30/720 # meters per pixel in y dimension
+    xm_per_pix = 3.7/700 # meteres per pixel in x dimension
+    fit_cr = np.polyfit(yvals*ym_per_pix, fitx*xm_per_pix, 2)
+    curverad = ((1 + (2*fit_cr[0]*y_eval + fit_cr[1])**2)**1.5) \
+                                 /np.absolute(2*fit_cr[0])
+    curverad = int(curverad)
+    return curverad
+
+
 
 def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
     outdir = ''):
@@ -536,9 +573,6 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
         out_path = os.path.join(outdir, name + '_bin_transform' + '.jpg')
         cv2.imwrite(out_path, proc_img)
 
-
-
-
     print(' ')
     print(' ')
     print(' ')
@@ -546,7 +580,6 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
 
     np.where(proc_img <= 100, proc_img, 0)
     np.where(proc_img > 100, proc_img, 255)
-
 
     img_shape = proc_img.shape
     zero_right = proc_img.copy()
@@ -556,75 +589,85 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
 
     # Get fit parameters for left lane
     left_raw_all = np.nonzero(zero_right)
-    left_raw_x = left_raw_all[0]
-    left_raw_y = left_raw_all[1]
-    left_fit = np.polyfit(left_raw_x, left_raw_y, 2)
+    left_raw_y = left_raw_all[0]
+    left_raw_x = left_raw_all[1]
+    left_fit_fofx = np.polyfit(left_raw_x, left_raw_y, 2) # f(x), not f(y)
+    left_fit_fofy = np.polyfit(left_raw_y, left_raw_x, 2) # f(y), not f(x)
 
     # Get fit parameters for right lane
     right_raw_all = np.nonzero(zero_left)
-    right_raw_x = right_raw_all[0]
-    right_raw_y = right_raw_all[1]
-    right_fit = np.polyfit(right_raw_x, right_raw_y, 2)
+    right_raw_y = right_raw_all[0]
+    right_raw_x = right_raw_all[1]
+    right_fit_fofx = np.polyfit(right_raw_x, right_raw_y, 2) # f(x), not f(y)
+    right_fit_fofy = np.polyfit(right_raw_y, right_raw_x, 2) # f(y), not f(x)
+
+    print(' ')
+    print(' ')
+    print(' ')
 
 
-    # Color the pixels that we will fit to in order to ensure we're using correct ones.
-    #temp = img.copy()
-    #temp = temp * 0
-    #print(temp.shape)
-    #temp[left_raw_x, left_raw_y,0] = 100
-    #temp[left_raw_x, left_raw_y,1] = 100
-    #cv2.imshow('Found lane pixels', temp)
-    #cv2.waitKey(2000)
+    # Shoehorn into Udacity framework
+    # Define conversions in x and y from pixels space to meters
+    ym_per_pix = 30/720 # meters per pixel in y dimension
+    xm_per_pix = 3.7/700 # meteres per pixel in x dimension
+    left_fit_cr = np.polyfit(left_raw_y*ym_per_pix, left_raw_x*xm_per_pix, 2)
+    right_fit_cr = np.polyfit(right_raw_y*ym_per_pix, right_raw_x*xm_per_pix, 2)
+
+    # Calculate the new radii of curvature
+    y_eval = np.max(left_raw_y) # Bottom of image. Y-value closest to the car.
+    left_curverad = ((1 + (2*left_fit_cr[0]*y_eval*ym_per_pix + left_fit_cr[1])**2)**1.5) / np.absolute(2*left_fit_cr[0])
+    right_curverad = ((1 + (2*right_fit_cr[0]*y_eval*ym_per_pix + right_fit_cr[1])**2)**1.5) / np.absolute(2*right_fit_cr[0])
+    # Now our radius of curvature is in meters
+    left_curverad = int(left_curverad)
+    right_curverad = int(right_curverad)
+    avg_curverad = int((left_curverad + right_curverad) / 2)
+
+    print(' ')
+    print(' ')
+    print(' ')
 
 
-    # Make general fit line
-#    yvals = np.linspace(0, img_shape[0])  # to cover same y-range as image
-#    left_fit_x = left_fit[0]*yvals**2 + left_fit[1]*yvals + left_fit[2]
-#
-#    left_x = np.linspace(0, img_shape[1])
-#    left_y = left_fit[0]*yvals**2 + left_fit[1]*yvals + left_fit[2]
-#
-#    yvals = yvals.astype(int)
-#    print(yvals)
-#    print(type(yvals))
-#    left_fit_x = left_fit_x.astype(int)
-#    print(left_fit_x)
-#    print(type(left_fit_x))
-    x_vals = np.linspace(0, img_shape[0]-1)
+#    left_curverad, right_curverad = calc_curve_rad(left_fit_fofy, right_fit_fofy)
+#    left_curverad  = find_curvature(left_fit_fofy, right_raw_x)
+#    right_curverad  = find_curvature(right_fit_fofy, right_raw_x)
+
+    # Pull points from fit to draw line
+    y_vals = np.linspace(0, img_shape[0]-1)
+    x_vals = np.linspace(0, img_shape[1]-1)
+    y_vals = y_vals.astype(int)
     x_vals = x_vals.astype(int)
+#    print('Max xval = ', np.max(x_vals))
 
-    left_fit_y = left_fit[0]*x_vals**2 + left_fit[1]*x_vals + left_fit[2]
-    left_fit_y = left_fit_y.astype(int)
+#    left_fit_yvals = left_fit_fofx[0]*x_vals**2 + left_fit_fofx[1]*x_vals + left_fit_fofx[2]
+#    right_fit_yvals = right_fit_fofx[0]*x_vals**2 + right_fit_fofx[1]*x_vals + right_fit_fofx[2]
 
-    right_fit_y = right_fit[0]*x_vals**2 + right_fit[1]*x_vals + right_fit[2]
-    right_fit_y = right_fit_y.astype(int)
+    left_fit_xvals = left_fit_fofy[0]*y_vals**2 + left_fit_fofy[1]*y_vals + left_fit_fofy[2]
+    right_fit_xvals = right_fit_fofy[0]*y_vals**2 + right_fit_fofy[1]*y_vals + right_fit_fofy[2]
 
-    #print(x_vals)
-    #print(left_fit_y)
+    lane_pos_left = left_fit_xvals[-1] * xm_per_pix
+    lane_pos_right = right_fit_xvals[-1] * xm_per_pix
+    lane_center = (lane_pos_right + lane_pos_left) / 2
+    image_center = (img_size[0]/2) * xm_per_pix
+    offset = image_center - lane_center
+    print('left, right, center', lane_pos_left, lane_pos_right, image_center)
+    print('Offset = ', '%.3f' % offset)
+    time.wait(500)
 
-    # Plot fit line on image
-    #temp = img.copy()
-    #temp = temp * 0
-    #print(temp.shape)
-    #temp[x_vals, left_fit_y, 0] = 100
-    #temp[x_vals, left_fit_y, 1] = 100
-    #cv2.imshow('Found lane pixels', temp)
-    #cv2.waitKey(1000)
 
-    str1 = 'Radius of Curvature = 7159(m)'
-    str2 = 'Vehicle is 0.17m left of center'
+    left_fit_xvals = left_fit_xvals.astype(int)
+    right_fit_xvals = right_fit_xvals.astype(int)
+
+
 
     # Create an image to draw the lines on
     warp_zero = np.zeros_like(bin_warp_img).astype(np.uint8)
     color_warp = np.dstack((warp_zero, warp_zero, warp_zero))
 
-    print(x_vals)
-    print(left_fit_y)
-
     # Recast the x and y points into usable format for cv2.fillPoly()
-    pts_left = np.array([np.transpose(np.vstack([left_fit_y, x_vals]))])
-    pts_right = np.array([np.flipud(np.transpose(np.vstack([right_fit_y, x_vals])))])
+    pts_left = np.array([np.transpose(np.vstack([left_fit_xvals, y_vals]))])
+    pts_right = np.array([np.flipud(np.transpose(np.vstack([right_fit_xvals, y_vals])))])
     pts = np.hstack((pts_left, pts_right))
+
 
     # Plot the re-cast points on the image to double check their integrity
     print(type(pts_left), pts_left.size)
@@ -643,6 +686,18 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
     #plt.imshow(result)
 
 
+    textstr1 = 'Lane curvature = ' + str(avg_curverad) + ' m'
+    textstr2 = 'Position = ' + str(-99999) + ' m'
+    textstr3 = 'Left lane curvature = ' + str(left_curverad) + ' m'
+    textstr4 = 'Right lane curvature = ' + str(right_curverad) + ' m'
+
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    cv2.putText(result,textstr1,(400,100), font, 1,(255,255,255),2)
+    cv2.putText(result,textstr2,(400,125), font, 1,(255,255,255),2)
+    cv2.putText(result,textstr3,(400,150), font, 1,(255,255,255),2)
+    cv2.putText(result,textstr4,(400,175), font, 1,(255,255,255),2)
+
+
     f, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(1, 5, figsize=(24, 9))
     #f.tight_layout()
 
@@ -653,8 +708,8 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
     ax2.set_title('Undistorted binary')
 
     ax3.imshow(bin_warp_img, cmap = 'gray')
-    ax3.plot(left_fit_y, x_vals, c='g', linewidth = 2)
-    ax3.plot(right_fit_y, x_vals, c='b', linewidth = 2)
+    ax3.plot(left_fit_xvals, y_vals, c='g', linewidth = 2)
+    ax3.plot(right_fit_xvals, y_vals, c='b', linewidth = 2)
     ax3.set_title('Undistorted, transformed binary')
 
     ax4.imshow(color_warp)
@@ -676,6 +731,11 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
     #time.wait(500)
 
 
+    cv2.imshow('Annotated final image', result)
+    cv2.waitKey(3000)
+    cv2.destroyAllWindows()
+    out_path = os.path.join(outdir, name + '_annotatedfinal' + '.jpg')
+    cv2.imwrite(out_path, result)
 
 
 #     f, axarr = plt.subplots(1, 3, figsize=(24, 9))
