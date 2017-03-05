@@ -575,9 +575,10 @@ def main():
             img_undistort = undistort_image(objpoints, imgpoints, img)
             curr_name = fname[-9:-4]
             out_path = os.path.join(dir_output_images, curr_name + '_annotatedfinal' + '.jpg')
-            cv2.imshow('Undistorted checkerboard', img_undistort)
-            cv2.waitKey(500)
+            cv2.imshow('Annotated final image', img_undistort)
+            cv2.waitKey(1000)
             cv2.destroyAllWindows()
+
             cv2.imwrite(out_path, img_undistort)
 
 
