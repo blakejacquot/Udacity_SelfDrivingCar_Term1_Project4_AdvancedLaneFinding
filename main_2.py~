@@ -386,6 +386,118 @@ def calc_curvature(raw_x, raw_y):
     return curverad
 
 
+def zero_left_right(img_bin_warp):
+    np.where(img_bin_warp <= 100, img_bin_warp, 0)
+    np.where(img_bin_warp > 100, img_bin_warp, 255)
+    img_shape = img_bin_warp.shape
+    zero_right = img_bin_warp.copy()
+    zero_left = img_bin_warp.copy()
+    zero_right[0:img_shape[0], img_shape[1]/2:img_shape[1]] = 0
+    zero_left[0:img_shape[0], 0:img_shape[1]/2] = 0
+    return zero_right, zero_left
+
+
+def calc_fit(zero_left, zero_right):
+
+    img_shape = zero_left.shape
+
+
+    # Get fit parameters for left lane
+    left_raw_all = np.nonzero(zero_right)
+    left_raw_y = left_raw_all[0]
+    left_raw_x = left_raw_all[1]
+    #left_fit_fofx = np.polyfit(left_raw_x, left_raw_y, 2) # f(x), not f(y)
+    left_fit_fofy = np.polyfit(left_raw_y, left_raw_x, 2) # f(y), not f(x)
+
+    # Get fit parameters for right lane
+    right_raw_all = np.nonzero(zero_left)
+    right_raw_y = right_raw_all[0]
+    right_raw_x = right_raw_all[1]
+    #right_fit_fofx = np.polyfit(right_raw_x, right_raw_y, 2) # f(x), not f(y)
+    right_fit_fofy = np.polyfit(right_raw_y, right_raw_x, 2) # f(y), not f(x)
+
+    # Calculate curvature of lanes in meters
+    right_curverad = calc_curvature(right_raw_x, right_raw_y)
+    left_curverad = calc_curvature(left_raw_x, left_raw_y)
+    left_curverad = int(left_curverad)
+    right_curverad = int(right_curverad)
+    avg_curverad = int((left_curverad + right_curverad) / 2)
+
+    # Make fit to draw lines on image
+    y_vals = np.linspace(0, img_shape[0]-1)
+    x_vals = np.linspace(0, img_shape[1]-1)
+    y_vals = y_vals.astype(int)
+    x_vals = x_vals.astype(int)
+    left_fit_xvals = left_fit_fofy[0]*y_vals**2 + left_fit_fofy[1]*y_vals + left_fit_fofy[2]
+    right_fit_xvals = right_fit_fofy[0]*y_vals**2 + right_fit_fofy[1]*y_vals + right_fit_fofy[2]
+    left_fit_xvals = left_fit_xvals.astype(int)
+    right_fit_xvals = right_fit_xvals.astype(int)
+
+
+    return left_fit_xvals, right_fit_xvals, y_vals, avg_curverad
+
+
+def calc_offset(left_fit_xvals, right_fit_xvals, img_size):
+    xm_per_pix = 3.7/700 # meteres per pixel in x dimension
+    lane_pos_left = left_fit_xvals[-1] * xm_per_pix
+    lane_pos_right = right_fit_xvals[-1] * xm_per_pix
+    lane_center = (lane_pos_right + lane_pos_left) / 2
+    image_center = (img_size[0]/2) * xm_per_pix
+    offset = image_center - lane_center
+    print('left, right, center', lane_pos_left, lane_pos_right, image_center)
+    print('Offset = ', '%.3f' % offset)
+
+    return offset
+
+def shade_lane(img_bin_warp, left_fit_xvals, right_fit_xvals, y_vals):
+
+    # Create an image to draw the lines on
+    warp_zero = np.zeros_like(img_bin_warp).astype(np.uint8)
+    img_color_warp = np.dstack((warp_zero, warp_zero, warp_zero))
+
+    # Recast the x and y points into usable format for cv2.fillPoly()
+    pts_left = np.array([np.transpose(np.vstack([left_fit_xvals, y_vals]))])
+    pts_right = np.array([np.flipud(np.transpose(np.vstack([right_fit_xvals, y_vals])))])
+    pts = np.hstack((pts_left, pts_right))
+
+    # Draw the lane onto the warped blank image
+    cv2.fillPoly(img_color_warp, np.int_([pts]), (0,255, 0))
+
+    return(img_color_warp)
+
+def annotate_image(newwarp, img, avg_curverad, offset):
+
+    img = img.astype(np.uint8)
+    newwarp = newwarp.astype(np.uint8)
+    img_result = cv2.addWeighted(img, 1, newwarp, 0.3, 0)
+
+    # Put text on image
+    textstr1 = 'Lane curvature = ' + str(avg_curverad) + ' m'
+    textstr2 = 'Position = ' + str(offset) + ' m'
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    cv2.putText(img_result,textstr1,(400,100), font, 1,(255,255,255),2)
+    cv2.putText(img_result,textstr2,(400,125), font, 1,(255,255,255),2)
+    return img_result
+
+def make_src_dst():
+
+    # Define src points for transform
+    offset_for_obscuration = 50
+    tl_src = (585, 450) # top left
+    tr_src = (720, 450) # top right
+    br_src = (1150, img_shape[0] - offset_for_obscuration) # bottom right
+    bl_src = (225,img_shape[0] - offset_for_obscuration) # bottom left
+    src = np.float32([[tl_src, tr_src, br_src, bl_src]])
+
+    # Define dst points for transform
+    tl_dst = [320, 0] # top left
+    tr_dst = [960, 0] # bottom left
+    br_dst = [960, 720] # top right
+    bl_dst = [320, 720] # bottom right OK
+    dst = np.float32([[tl_dst, tr_dst, br_dst, bl_dst]])
+    return src, dst
+
+
 def proc_pipeline(objpoints, imgpoints, img, verbose, outdir = '', name = ''):
     """ Process verbose image pipline on an image with intermediate states plotted
     and saved.
@@ -420,110 +532,18 @@ def proc_pipeline(objpoints, imgpoints, img, verbose, outdir = '', name = ''):
     img_shape = img.shape
     img_size = (img_shape[1],img_shape[0])
 
-    # Define src points for transform
-    offset_for_obscuration = 50
-    tl_src = (585, 450) # top left
-    tr_src = (720, 450) # top right
-    br_src = (1150, img_shape[0] - offset_for_obscuration) # bottom right
-    bl_src = (225,img_shape[0] - offset_for_obscuration) # bottom left
-    src = np.float32([[tl_src, tr_src, br_src, bl_src]])
-
-    # Define dst points for transform
-    tl_dst = [320, 0] # top left
-    tr_dst = [960, 0] # bottom left
-    br_dst = [960, 720] # top right
-    bl_dst = [320, 720] # bottom right OK
-    dst = np.float32([[tl_dst, tr_dst, br_dst, bl_dst]])
-
+    src, dst = make_src_dst()
     img_undistort = undistort_image(objpoints, imgpoints, img)
     img_roi = region_of_interest(img_undistort, src)
     M, Minv = get_warp_params(img, src, dst)
     img_bin = make_binary_image(img_roi)
     img_bin_warp = warper(img_bin, M)
-
-    # Get zeroed left, zeroed right image for fitting lane pixels.
-    np.where(img_bin_warp <= 100, img_bin_warp, 0)
-    np.where(img_bin_warp > 100, img_bin_warp, 255)
-    img_shape = img_bin_warp.shape
-    zero_right = img_bin_warp.copy()
-    zero_left = img_bin_warp.copy()
-    zero_right[0:img_shape[0], img_shape[1]/2:img_shape[1]] = 0
-    zero_left[0:img_shape[0], 0:img_shape[1]/2] = 0
-
-    # Get fit parameters for left lane
-    left_raw_all = np.nonzero(zero_right)
-    left_raw_y = left_raw_all[0]
-    left_raw_x = left_raw_all[1]
-    left_fit_fofx = np.polyfit(left_raw_x, left_raw_y, 2) # f(x), not f(y)
-    left_fit_fofy = np.polyfit(left_raw_y, left_raw_x, 2) # f(y), not f(x)
-
-    # Get fit parameters for right lane
-    right_raw_all = np.nonzero(zero_left)
-    right_raw_y = right_raw_all[0]
-    right_raw_x = right_raw_all[1]
-    right_fit_fofx = np.polyfit(right_raw_x, right_raw_y, 2) # f(x), not f(y)
-    right_fit_fofy = np.polyfit(right_raw_y, right_raw_x, 2) # f(y), not f(x)
-
-    # Calculate curvature of lanes in meters
-    right_curverad = calc_curvature(right_raw_x, right_raw_y)
-    left_curverad = calc_curvature(left_raw_x, left_raw_y)
-    left_curverad = int(left_curverad)
-    right_curverad = int(right_curverad)
-    avg_curverad = int((left_curverad + right_curverad) / 2)
-
-    # Make fit to draw lines on image
-    y_vals = np.linspace(0, img_shape[0]-1)
-    x_vals = np.linspace(0, img_shape[1]-1)
-    y_vals = y_vals.astype(int)
-    x_vals = x_vals.astype(int)
-    left_fit_xvals = left_fit_fofy[0]*y_vals**2 + left_fit_fofy[1]*y_vals + left_fit_fofy[2]
-    right_fit_xvals = right_fit_fofy[0]*y_vals**2 + right_fit_fofy[1]*y_vals + right_fit_fofy[2]
-    left_fit_xvals = left_fit_xvals.astype(int)
-    right_fit_xvals = right_fit_xvals.astype(int)
-
-    # Calculate offset of car from lane center in meters
-    xm_per_pix = 3.7/700 # meteres per pixel in x dimension
-    lane_pos_left = left_fit_xvals[-1] * xm_per_pix
-    lane_pos_right = right_fit_xvals[-1] * xm_per_pix
-    lane_center = (lane_pos_right + lane_pos_left) / 2
-    image_center = (img_size[0]/2) * xm_per_pix
-    offset = image_center - lane_center
-    print('left, right, center', lane_pos_left, lane_pos_right, image_center)
-    print('Offset = ', '%.3f' % offset)
-
-    # Create an image to draw the lines on
-    warp_zero = np.zeros_like(img_bin_warp).astype(np.uint8)
-    img_color_warp = np.dstack((warp_zero, warp_zero, warp_zero))
-
-    # Recast the x and y points into usable format for cv2.fillPoly()
-    pts_left = np.array([np.transpose(np.vstack([left_fit_xvals, y_vals]))])
-    pts_right = np.array([np.flipud(np.transpose(np.vstack([right_fit_xvals, y_vals])))])
-    pts = np.hstack((pts_left, pts_right))
-
-    # Plot the re-cast points on the image to double check their integrity
-    print(type(pts_left), pts_left.size)
-    print(pts_left)
-
-    # Draw the lane onto the warped blank image
-    cv2.fillPoly(img_color_warp, np.int_([pts]), (0,255, 0))
-
-    # Warp image back to original form and overlay lane shading
+    zero_right, zero_left = zero_left_right(img_bin_warp)
+    left_fit_xvals, right_fit_xvals, y_vals, avg_curverad = calc_fit(zero_left, zero_right)
+    offset = calc_offset(left_fit_xvals, right_fit_xvals, img_size)
+    img_color_warp = shade_lane(img_bin_warp, left_fit_xvals, right_fit_xvals, y_vals)
     newwarp = warper(img_color_warp, Minv)
-    img = img.astype(np.uint8)
-    newwarp = newwarp.astype(np.uint8)
-    img_result = cv2.addWeighted(img, 1, newwarp, 0.3, 0)
-
-    # Put text on image and display results
-    textstr1 = 'Lane curvature = ' + str(avg_curverad) + ' m'
-    textstr2 = 'Position = ' + str(offset) + ' m'
-    #textstr3 = 'Left lane curvature = ' + str(left_curverad) + ' m'
-    #textstr4 = 'Right lane curvature = ' + str(right_curverad) + ' m'
-    font = cv2.FONT_HERSHEY_SIMPLEX
-    cv2.putText(img_result,textstr1,(400,100), font, 1,(255,255,255),2)
-    cv2.putText(img_result,textstr2,(400,125), font, 1,(255,255,255),2)
-    #cv2.putText(result,textstr3,(400,150), font, 1,(255,255,255),2)
-    #cv2.putText(result,textstr4,(400,175), font, 1,(255,255,255),2)
-
+    img_result = annotate_image(newwarp, img, avg_curverad, offset)
 
     if verbose:
         img_roicrop_warp = warper(img_roi, M)
@@ -593,8 +613,6 @@ def main():
             img = cv2.imread(fname)
             curr_name = fname[-10:-4]
             ret_img = proc_pipeline(objpoints, imgpoints, img, verbose, outdir = dir_output_images, name = curr_name)
-#            out_path = os.path.join(dir_output_images, curr_name + '.jpg')
-#            cv2.imwrite(out_path, ret_img)
 
     if proc_pipeline_test_images == 1:
         search_phrase = os.path.join(dir_test_images, '*.jpg')
