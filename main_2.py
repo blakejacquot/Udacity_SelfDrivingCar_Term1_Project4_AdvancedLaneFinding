@@ -30,7 +30,6 @@ def compute_camera_cal(dir_cal_images):
         imgpoints: List of 2d points in image plane.
 
     """
-    print('Computing camera calibration matrices')
     # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
     num_x = 9 # Number of inside corners in x-direction
     num_y = 6 # Number of inside corners in y-direction
@@ -118,12 +117,9 @@ def region_of_interest(img, vertices):
     if len(img.shape) > 2:
         channel_count = img.shape[2]  # i.e. 3 or 4 depending on your image
         ignore_mask_color = (255,) * channel_count
-        print('Three-channel image')
     else:
         ignore_mask_color = 255
-        print('One-channel image')
 
-    print(ignore_mask_color)
     vertices = vertices.astype(int)
 
     #filling pixels inside the polygon defined by "vertices" with the fill color
@@ -137,10 +133,6 @@ def get_warp_params(img, src, dst):
     """
     Docstring
     """
-
-    # Display info
-    print('src', src)
-    print('dst', dst)
 
     # Calculate perspective parameters for warping and unwarping
     M = cv2.getPerspectiveTransform(src, dst)
@@ -156,12 +148,6 @@ def warper(img, M):
     img_size = (img_shape[1],img_shape[0])
     img_proc = cv2.warpPerspective(img, M, img_size)
     return img_proc
-
-#def unwarp(img, Minv):
-#    img_shape = img.shape
-#    img_size = (img_shape[1],img_shape[0])
-#    return cv2.warpPerspective(img,Minv,img_size)
-#    return img
 
 def draw_lines(img, lines, color=[255, 0, 0], thickness=2):
     """
@@ -216,31 +202,6 @@ def hough_lines(img, rho = 3, theta = np.pi/180, threshold = 10,
     lines = cv2.HoughLinesP(img, rho, theta, threshold, np.array([]),
         minLineLength=min_line_len, maxLineGap=max_line_gap)
     return lines
-
-def mark_lane_pixels():
-    """
-    Docstring
-    """
-    pass
-
-def calc_lane_curvature():
-    """
-    Docstring
-    """
-    pass
-
-def warp_lanes_to_origimage():
-    """
-    Docstring
-    """
-    pass
-
-def write_annotated_image():
-    """
-    Docstring
-    """
-    pass
-
 
 # Calculate directional gradient
 def abs_sobel_thresh(gray, orient='x', sobel_kernel=3, thresh=(0, 255)):
@@ -343,7 +304,6 @@ def make_binary_image(img):
     color_binary[(s_binary > 0) | (combined > 0)] = 1
 
     if np.amax(color_binary) < 200:
-        print('Scaling image')
         color_binary = (color_binary / np.amax(color_binary)) * 255
     return color_binary
 
@@ -444,9 +404,6 @@ def calc_offset(left_fit_xvals, right_fit_xvals, img_size):
     lane_center = (lane_pos_right + lane_pos_left) / 2
     image_center = (img_size[0]/2) * xm_per_pix
     offset = image_center - lane_center
-    print('left, right, center', lane_pos_left, lane_pos_right, image_center)
-    print('Offset = ', '%.3f' % offset)
-
     return offset
 
 def shade_lane(img_bin_warp, left_fit_xvals, right_fit_xvals, y_vals):
@@ -531,7 +488,6 @@ def proc_pipeline(objpoints, imgpoints, img, verbose, outdir = '', name = ''):
     # Calculate parameters for later use.
     img_shape = img.shape
     img_size = (img_shape[1],img_shape[0])
-
     src, dst = make_src_dst(img_shape)
     img_undistort = undistort_image(objpoints, imgpoints, img)
     img_roi = region_of_interest(img_undistort, src)
@@ -569,6 +525,11 @@ def proc_pipeline(objpoints, imgpoints, img, verbose, outdir = '', name = ''):
         ax7.set_title('Annotated, undistorted image')
         plt.show()
         out_path = os.path.join(outdir, name + '_total_results' + '.png')
+        print(' ')
+        print('outdir = ', outdir)
+        print('name = ', name)
+        print('out_path = ', out_path)
+        print(' ')
         f.savefig(out_path, bbox_inches='tight', format='png')
 
         # Show large version of annotated final image
@@ -611,7 +572,7 @@ def main():
         images = glob.glob(search_phrase)
         for fname in images:
             img = cv2.imread(fname)
-            curr_name = fname[-10:-4]
+            curr_name = fname[-9:-4]
             ret_img = proc_pipeline(objpoints, imgpoints, img, verbose, outdir = dir_output_images, name = curr_name)
 
     if proc_pipeline_test_images == 1:
@@ -619,7 +580,7 @@ def main():
         images = glob.glob(search_phrase)
         for fname in images:
             img = cv2.imread(fname)
-            curr_name = fname[-10:-4]
+            curr_name = fname[-9:-4]
             ret_img = proc_pipeline(objpoints, imgpoints, img, verbose, outdir = dir_output_images, name = curr_name)
 
     if proc_pipeline_target_images == 0:
