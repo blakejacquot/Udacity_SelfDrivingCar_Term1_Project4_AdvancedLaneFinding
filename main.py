@@ -574,7 +574,7 @@ def main():
             img = cv2.imread(fname)
             img_undistort = undistort_image(objpoints, imgpoints, img)
             curr_name = fname[-9:-4]
-            out_path = os.path.join(dir_output_images, curr_name + '_annotatedfinal' + '.jpg')
+            out_path = os.path.join(dir_output_images, curr_name + '_undistorted' + '.jpg')
             cv2.imshow('Undistorted checkerboard', img_undistort)
             cv2.waitKey(500)
             cv2.destroyAllWindows()
