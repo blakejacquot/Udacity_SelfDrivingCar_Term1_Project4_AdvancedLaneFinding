@@ -386,8 +386,7 @@ def calc_curvature(raw_x, raw_y):
     return curverad
 
 
-def proc_verbose_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
-    outdir = ''):
+def proc_pipeline(objpoints, imgpoints, img, verbose, outdir = '', name = ''):
     """ Process verbose image pipline on an image with intermediate states plotted
     and saved.
 
@@ -436,100 +435,11 @@ def proc_verbose_pipeline(objpoints, imgpoints, img, save_interm_results = 0, na
     bl_dst = [320, 720] # bottom right OK
     dst = np.float32([[tl_dst, tr_dst, br_dst, bl_dst]])
 
-    # Verbosity: Display original image
-    cv2.imshow('Original image', img)
-    cv2.waitKey(500)
-
     img_undistort = undistort_image(objpoints, imgpoints, img)
-
-    # Verbosity
-    if save_interm_results:
-        cv2.imshow('Undistorted image', img_undistort)
-        cv2.waitKey(500)
-        cv2.destroyAllWindows()
-        out_path = os.path.join(outdir, name + '_undistorted' + '.jpg')
-        cv2.imwrite(out_path, img_undistort)
-
     img_roi = region_of_interest(img_undistort, src)
-
-    # Verbosity
-    if save_interm_results:
-        cv2.imshow('roi_img', img_roi)
-        cv2.waitKey(1500)
-        cv2.destroyAllWindows()
-        out_path = os.path.join(outdir, name + '_ROIimg' + '.jpg')
-        cv2.imwrite(out_path, img_roi)
-
-    # Verbosity
-    # Draw region of interest on image
-    lines = np.zeros((4,1,4))
-    lines[0,0,:] = np.array([tl_src[0], tl_src[1], tr_src[0], tr_src[1]]) #tl, tr
-    lines[1,0,:] = np.array([br_src[0], br_src[1], tr_src[0], tr_src[1]]) #tr, br
-    lines[2,0,:] = np.array([br_src[0], br_src[1], bl_src[0], bl_src[1]]) #br, bl
-    lines[3,0,:] = np.array([tl_src[0], tl_src[1], bl_src[0], bl_src[1]]) #bl, tl
-
-    # Verbosity
-    # Draw the region of interest on undistorted image and save results.
-    img_temp = img_roi.copy()
-    img_temp = draw_lines(img_temp, lines)
-    if save_interm_results:
-        cv2.imshow('img', img_temp)
-        cv2.waitKey(500)
-        cv2.destroyAllWindows()
-        out_path = os.path.join(outdir, name + '_drawROI' + '.jpg')
-        cv2.imwrite(out_path, img_temp)
-
-    # Verbosity
-    # Make perspective transformed image from region of interest image and save results
     M, Minv = get_warp_params(img, src, dst)
-    img_roicrop_warp = warper(img_roi, M)
-
-    if save_interm_results:
-        cv2.imshow('Warped image', img_roicrop_warp)
-        cv2.waitKey(500)
-        cv2.destroyAllWindows()
-        out_path = os.path.join(outdir, name + '_perspectivetransformed_drawROI' + '.jpg')
-        cv2.imwrite(out_path, img_roicrop_warp)
-
-    # Verbosity
-    # Warp the blank back to original image space using inverse perspective matrix (Minv)
-    img_newwarp = warper(img_roicrop_warp, Minv)
-
-    # Verbosity
-    # Display intermediate results
-    f, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(24, 9))
-    ax1.imshow(img_undistort)
-    ax1.set_title('Undistorted original image')
-    ax2.imshow(img_roicrop_warp, cmap = 'gray')
-    ax2.set_title('Warped image')
-    ax3.imshow(img_newwarp, cmap = 'gray')
-    ax3.set_title('De-warped image')
-    plt.show()
-
-    # Make binary image
-    img_bin = make_binary_image(img_roicrop_warp)
-
-    # Verbosity
-    if save_interm_results:
-        cv2.imshow('Binary image', img_bin)
-        cv2.waitKey(500)
-        cv2.destroyAllWindows()
-        out_path = os.path.join(outdir, name + '_bin' + '.jpg')
-        cv2.imwrite(out_path, img_bin)
-
-    # Make perspective transformed image.
-    M, Minv = get_warp_params(img, src, dst)
+    img_bin = make_binary_image(img_roi)
     img_bin_warp = warper(img_bin, M)
-
-
-
-    if save_interm_results:
-        cv2.imshow('bin_transform', img_bin_warp)
-        cv2.waitKey(500)
-        cv2.destroyAllWindows()
-        out_path = os.path.join(outdir, name + '_bin_transform' + '.jpg')
-        cv2.imwrite(out_path, img_bin_warp)
-
 
     # Get zeroed left, zeroed right image for fitting lane pixels.
     np.where(img_bin_warp <= 100, img_bin_warp, 0)
@@ -601,46 +511,49 @@ def proc_verbose_pipeline(objpoints, imgpoints, img, save_interm_results = 0, na
     newwarp = warper(img_color_warp, Minv)
     img = img.astype(np.uint8)
     newwarp = newwarp.astype(np.uint8)
-    result = cv2.addWeighted(img, 1, newwarp, 0.3, 0)
+    img_result = cv2.addWeighted(img, 1, newwarp, 0.3, 0)
 
-    # Put text on image and display results
+    # Put text on image
     textstr1 = 'Lane curvature = ' + str(avg_curverad) + ' m'
     textstr2 = 'Position = ' + str(offset) + ' m'
-    #textstr3 = 'Left lane curvature = ' + str(left_curverad) + ' m'
-    #textstr4 = 'Right lane curvature = ' + str(right_curverad) + ' m'
     font = cv2.FONT_HERSHEY_SIMPLEX
-    cv2.putText(result,textstr1,(400,100), font, 1,(255,255,255),2)
-    cv2.putText(result,textstr2,(400,125), font, 1,(255,255,255),2)
-    #cv2.putText(result,textstr3,(400,150), font, 1,(255,255,255),2)
-    #cv2.putText(result,textstr4,(400,175), font, 1,(255,255,255),2)
-    cv2.imshow('Annotated final image', result)
-    cv2.waitKey(3000)
-    cv2.destroyAllWindows()
-    out_path = os.path.join(outdir, name + '_annotatedfinal' + '.jpg')
-    cv2.imwrite(out_path, result)
+    cv2.putText(img_result,textstr1,(400,100), font, 1,(255,255,255),2)
+    cv2.putText(img_result,textstr2,(400,125), font, 1,(255,255,255),2)
 
-    # Verbosity
-    # Display results
-    f, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(1, 5, figsize=(24, 9))
-    ax1.imshow(img)
-    ax1.set_title('Undistorted original image')
-    ax2.imshow(img_bin, cmap = 'gray')
-    ax2.set_title('Undistorted binary')
-    ax3.imshow(img_bin_warp, cmap = 'gray')
-    ax3.plot(left_fit_xvals, y_vals, c='g', linewidth = 2)
-    ax3.plot(right_fit_xvals, y_vals, c='b', linewidth = 2)
-    ax3.set_title('Undistorted, transformed binary')
-    ax4.imshow(img_color_warp)
-    ax4.set_title('Lanes on binary image')
-    ax5.imshow(result)
-    ax5.set_title('Lanes on image')
-    plt.show()
-    print(outdir, name)
-    out_path = os.path.join(outdir, name + '_total_results' + '.png')
-    print(out_path)
-    f.savefig(out_path, bbox_inches='tight', format='png')
+    if verbose:
+        img_roicrop_warp = warper(img_roi, M)
+        img_newwarp = warper(img_roicrop_warp, Minv)
 
-    return proc_img
+        # Make figure of all intermediate results
+        f, ((ax1, ax2, ax3), (ax4, ax5, ax6), (ax7, ax8, ax9)) = plt.subplots(3, 3, figsize=(24, 9))
+        ax1.imshow(img_undistort)
+        ax1.set_title('Undistorted original image')
+        ax2.imshow(img_roicrop_warp, cmap = 'gray')
+        ax2.set_title('Warped image cropped to ROI')
+        ax3.imshow(img_newwarp, cmap = 'gray')
+        ax3.set_title('De-warped image (to show it can be done)')
+        ax4.imshow(img_bin, cmap = 'gray')
+        ax4.set_title('Undistorted binary')
+        ax5.imshow(img_bin_warp, cmap = 'gray')
+        ax5.plot(left_fit_xvals, y_vals, c='g', linewidth = 2)
+        ax5.plot(right_fit_xvals, y_vals, c='b', linewidth = 2)
+        ax5.set_title('Transform binary and fit lanes')
+        ax6.imshow(img_color_warp)
+        ax6.set_title('Lane shaded on binary image')
+        ax7.imshow(img_result)
+        ax7.set_title('Annotated, undistorted image')
+        plt.show()
+        out_path = os.path.join(outdir, name + '_total_results' + '.png')
+        f.savefig(out_path, bbox_inches='tight', format='png')
+
+        # Show large version of annotated final image
+        cv2.imshow('Annotated final image', img_result)
+        cv2.waitKey(1000)
+        cv2.destroyAllWindows()
+        out_path = os.path.join(outdir, name + '_annotatedfinal' + '.jpg')
+        cv2.imwrite(out_path, img_result)
+
+    return img_result
 
 
 def main():
@@ -655,6 +568,7 @@ def main():
     proc_pipeline_cal_images = 0
     proc_pipeline_test_images = 1
     proc_pipeline_target_images = 0
+    verbose = True
 
     if proc_distortion_data == 1:
         objpoints, imgpoints = compute_camera_cal(dir_cal_images)
@@ -662,7 +576,6 @@ def main():
         pickle_data["objpoints"] = objpoints
         pickle_data["imgpoints"] = imgpoints
         pickle.dump( pickle_data, open("calibration_data.p", "wb" ))
-
 
     pickle_data = pickle.load(open("calibration_data.p","rb"))
     objpoints = pickle_data["objpoints"]
@@ -672,22 +585,19 @@ def main():
         search_phrase = os.path.join(dir_cal_images, '*.jpg')
         images = glob.glob(search_phrase)
         for fname in images:
-            print('Processing ', fname)
             img = cv2.imread(fname)
-            ret_img = proc_verbose_pipeline(objpoints, imgpoints, img, outdir = dir_output_images)
             curr_name = fname[-10:-4]
-            out_path = os.path.join(dir_output_images, curr_name + '.jpg')
-            cv2.imwrite(out_path, ret_img)
+            ret_img = proc_pipeline(objpoints, imgpoints, img, verbose, outdir = dir_output_images, name = curr_name)
+#            out_path = os.path.join(dir_output_images, curr_name + '.jpg')
+#            cv2.imwrite(out_path, ret_img)
 
     if proc_pipeline_test_images == 1:
         search_phrase = os.path.join(dir_test_images, '*.jpg')
         images = glob.glob(search_phrase)
         for fname in images:
-            print('Processing ', fname)
             img = cv2.imread(fname)
-            curr_name = fname[-9:-4]
-            ret_img = proc_verbose_pipeline(objpoints, imgpoints, img, save_interm_results = 1,
-                name = curr_name)
+            curr_name = fname[-10:-4]
+            ret_img = proc_pipeline(objpoints, imgpoints, img, verbose, outdir = dir_output_images, name = curr_name)
 
     if proc_pipeline_target_images == 0:
         print(dir_output_images)

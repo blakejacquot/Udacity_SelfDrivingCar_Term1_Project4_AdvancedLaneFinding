@@ -305,9 +305,6 @@ def make_binary_image(img):
     ksize = 7
     img_blur_gray = gaussian_blur(gray_image, ksize)
 
-
-
-
     ksize = 3
 #    gradx = abs_sobel_thresh(img_blur_gray, orient='x', sobel_kernel=ksize, thresh=(10, 255))
 #    grady = abs_sobel_thresh(img_blur_gray, orient='y', sobel_kernel=ksize, thresh=(60, 255))
@@ -375,47 +372,24 @@ class Line():
         #y values for detected line pixels
         self.ally = None
 
-def calc_curve_rad(left_fit_fofy, right_fit_fofy):
-
-    y_eval = 700
 
 
-
-    ym_per_pix = 30/720 # meters per pixel in y dimension
-    xm_per_pix = 3.7/700 # meters per pixel in x dimension
-
-    # Fit new polynomials to x,y in world space
-#    left_fit_fofx_cr = np.polyfit(ploty*ym_per_pix, leftx*xm_per_pix, 2)
-#    right_fit_fofx_cr = np.polyfit(ploty*ym_per_pix, rightx*xm_per_pix, 2)
-
-    # Calculate the new radii of curvature
-    left_curverad = ((1 + (2*left_fit_fofy[0]*y_eval*ym_per_pix + left_fit_fofy[1])**2)**1.5) / np.absolute(2*left_fit_fofy[0])
-    right_curverad = ((1 + (2*right_fit_fofy[0]*y_eval*ym_per_pix + right_fit_fofy[1])**2)**1.5) / np.absolute(2*right_fit_fofy[0])
-
-    # Now our radius of curvature is in meters
-    print(left_curverad, 'm', right_curverad, 'm')
-    # Example values: 632.1 m    626.2 m
-    return left_curverad, right_curverad
-
-
-def find_curvature(yvals, fitx):
-    # Define y-value where we want radius of curvature
-    # I'll choose the maximum y-value, corresponding to the bottom of the image
-    y_eval = np.max(yvals)
+def calc_curvature(raw_x, raw_y):
+    # Shoehorn into Udacity framework
     # Define conversions in x and y from pixels space to meters
     ym_per_pix = 30/720 # meters per pixel in y dimension
     xm_per_pix = 3.7/700 # meteres per pixel in x dimension
-    fit_cr = np.polyfit(yvals*ym_per_pix, fitx*xm_per_pix, 2)
-    curverad = ((1 + (2*fit_cr[0]*y_eval + fit_cr[1])**2)**1.5) \
-                                 /np.absolute(2*fit_cr[0])
-    curverad = int(curverad)
+
+    fit = np.polyfit(raw_y*ym_per_pix, raw_x*xm_per_pix, 2)
+    y_eval = np.max(raw_y) # Bottom of image. Y-value closest to the car.
+    curverad = ((1 + (2*fit[0]*y_eval*ym_per_pix + fit[1])**2)**1.5) / np.absolute(2*fit[0])
     return curverad
 
 
-
-def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
+def proc_verbose_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
     outdir = ''):
-    """ Process an image pipline on an image
+    """ Process verbose image pipline on an image with intermediate states plotted
+    and saved.
 
     Args:
         objpoints:
@@ -443,20 +417,6 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
     curvature and vehicle position.
     """
 
-    # Display original image
-    cv2.imshow('img', img)
-    cv2.waitKey(500)
-
-    # Undistort image and save results.
-    proc_img = undistort_image(objpoints, imgpoints, img)
-    orig_img = proc_img
-    if save_interm_results:
-        cv2.imshow('img', proc_img)
-        cv2.waitKey(500)
-        cv2.destroyAllWindows()
-        out_path = os.path.join(outdir, name + '_undistorted' + '.jpg')
-        cv2.imwrite(out_path, proc_img)
-
     # Calculate parameters for later use.
     img_shape = img.shape
     img_size = (img_shape[1],img_shape[0])
@@ -476,17 +436,31 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
     bl_dst = [320, 720] # bottom right OK
     dst = np.float32([[tl_dst, tr_dst, br_dst, bl_dst]])
 
+    # Verbosity: Display original image
+    cv2.imshow('Original image', img)
+    cv2.waitKey(500)
 
-    roi_img = region_of_interest(proc_img, src)
+    img_undistort = undistort_image(objpoints, imgpoints, img)
+
+    # Verbosity
     if save_interm_results:
-        cv2.imshow('roi_img', roi_img)
+        cv2.imshow('Undistorted image', img_undistort)
+        cv2.waitKey(500)
+        cv2.destroyAllWindows()
+        out_path = os.path.join(outdir, name + '_undistorted' + '.jpg')
+        cv2.imwrite(out_path, img_undistort)
+
+    img_roi = region_of_interest(img_undistort, src)
+
+    # Verbosity
+    if save_interm_results:
+        cv2.imshow('roi_img', img_roi)
         cv2.waitKey(1500)
         cv2.destroyAllWindows()
         out_path = os.path.join(outdir, name + '_ROIimg' + '.jpg')
-        cv2.imwrite(out_path, proc_img)
+        cv2.imwrite(out_path, img_roi)
 
-    proc_img = roi_img
-
+    # Verbosity
     # Draw region of interest on image
     lines = np.zeros((4,1,4))
     lines[0,0,:] = np.array([tl_src[0], tl_src[1], tr_src[0], tr_src[1]]) #tl, tr
@@ -494,96 +468,75 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
     lines[2,0,:] = np.array([br_src[0], br_src[1], bl_src[0], bl_src[1]]) #br, bl
     lines[3,0,:] = np.array([tl_src[0], tl_src[1], bl_src[0], bl_src[1]]) #bl, tl
 
+    # Verbosity
     # Draw the region of interest on undistorted image and save results.
-    proc_img_temp = proc_img.copy()
-    proc_img_temp = draw_lines(proc_img_temp, lines)
+    img_temp = img_roi.copy()
+    img_temp = draw_lines(img_temp, lines)
     if save_interm_results:
-        cv2.imshow('img', proc_img_temp)
+        cv2.imshow('img', img_temp)
         cv2.waitKey(500)
         cv2.destroyAllWindows()
         out_path = os.path.join(outdir, name + '_drawROI' + '.jpg')
-        cv2.imwrite(out_path, proc_img_temp)
+        cv2.imwrite(out_path, img_temp)
 
+    # Verbosity
     # Make perspective transformed image from region of interest image and save results
     M, Minv = get_warp_params(img, src, dst)
-    img_warp = warper(proc_img_temp, M)
+    img_roicrop_warp = warper(img_roi, M)
+
     if save_interm_results:
-        cv2.imshow('img', img_warp)
+        cv2.imshow('Warped image', img_roicrop_warp)
         cv2.waitKey(500)
         cv2.destroyAllWindows()
         out_path = os.path.join(outdir, name + '_perspectivetransformed_drawROI' + '.jpg')
-        cv2.imwrite(out_path, proc_img_temp)
+        cv2.imwrite(out_path, img_roicrop_warp)
 
-
+    # Verbosity
     # Warp the blank back to original image space using inverse perspective matrix (Minv)
-    newwarp = warper(img_warp, Minv)
+    img_newwarp = warper(img_bin_warp, Minv)
 
-
-
-
+    # Verbosity
+    # Display intermediate results
     f, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(24, 9))
-
-    ax1.imshow(orig_img)
+    ax1.imshow(img_undistort)
     ax1.set_title('Undistorted original image')
-
-    ax2.imshow(img_warp, cmap = 'gray')
+    ax2.imshow(img_roicrop_warp, cmap = 'gray')
     ax2.set_title('Warped image')
-
-    ax3.imshow(newwarp, cmap = 'gray')
+    ax3.imshow(img_newwarp, cmap = 'gray')
     ax3.set_title('De-warped image')
-
     plt.show()
 
+    # Make binary image
+    img_bin = make_binary_image(img_roicrop_warp)
 
-
-
-    # Make binary image, crop to ROI, and save results.
-    proc_img = make_binary_image(proc_img)
-    bin_img = proc_img
+    # Verbosity
     if save_interm_results:
-        cv2.imshow('bin', proc_img)
+        cv2.imshow('Binary image', img_bin)
         cv2.waitKey(500)
         cv2.destroyAllWindows()
         out_path = os.path.join(outdir, name + '_bin' + '.jpg')
-        cv2.imwrite(out_path, proc_img)
+        cv2.imwrite(out_path, img_bin)
 
-
-
-
-##     Get Hough lines, draw lines on image, trim to ROI, and save results.
-#     lines = hough_lines(proc_img) # returns numpy.ndarray of shape (x, 1, 4)
-#     proc_img = draw_lines(proc_img, lines)
-#     vertices = np.array([[tl_src, tr_src, br_src, bl_src]], dtype=np.int32)
-#     proc_img = region_of_interest(proc_img, vertices)
-#     if save_interm_results:
-#         cv2.imshow('img', proc_img)
-#         cv2.waitKey(500)
-#         cv2.destroyAllWindows()
-#         out_path = os.path.join(outdir, name + '_drawHoughlines' + '.jpg')
-#         cv2.imwrite(out_path, proc_img)
-
-    # Make perspective transformed image on the Hough image.
+    # Make perspective transformed image.
     M, Minv = get_warp_params(img, src, dst)
-    proc_img = warper(proc_img, M)
-    bin_warp_img = proc_img
+    img_bin_warp = warper(img_bin, M)
+
+
+
     if save_interm_results:
-        cv2.imshow('bin_transform', proc_img)
+        cv2.imshow('bin_transform', img_bin_warp)
         cv2.waitKey(500)
         cv2.destroyAllWindows()
         out_path = os.path.join(outdir, name + '_bin_transform' + '.jpg')
-        cv2.imwrite(out_path, proc_img)
+        cv2.imwrite(out_path, img_bin_warp)
 
-    print(' ')
-    print(' ')
-    print(' ')
-    mark_lane_pixels()
 
-    np.where(proc_img <= 100, proc_img, 0)
-    np.where(proc_img > 100, proc_img, 255)
-
-    img_shape = proc_img.shape
-    zero_right = proc_img.copy()
-    zero_left = proc_img.copy()
+    # Get zeroed left, zeroed right image for fitting lane pixels.
+    np.where(img_bin_warp <= 100, img_bin_warp, 0)
+    np.where(img_bin_warp > 100, img_bin_warp, 255)
+    img_shape = img_bin_warp.shape
+    zero_right = img_bin_warp.copy()
+    zero_left = img_bin_warp.copy()
     zero_right[0:img_shape[0], img_shape[1]/2:img_shape[1]] = 0
     zero_left[0:img_shape[0], 0:img_shape[1]/2] = 0
 
@@ -601,49 +554,25 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
     right_fit_fofx = np.polyfit(right_raw_x, right_raw_y, 2) # f(x), not f(y)
     right_fit_fofy = np.polyfit(right_raw_y, right_raw_x, 2) # f(y), not f(x)
 
-    print(' ')
-    print(' ')
-    print(' ')
-
-
-    # Shoehorn into Udacity framework
-    # Define conversions in x and y from pixels space to meters
-    ym_per_pix = 30/720 # meters per pixel in y dimension
-    xm_per_pix = 3.7/700 # meteres per pixel in x dimension
-    left_fit_cr = np.polyfit(left_raw_y*ym_per_pix, left_raw_x*xm_per_pix, 2)
-    right_fit_cr = np.polyfit(right_raw_y*ym_per_pix, right_raw_x*xm_per_pix, 2)
-
-    # Calculate the new radii of curvature
-    y_eval = np.max(left_raw_y) # Bottom of image. Y-value closest to the car.
-    left_curverad = ((1 + (2*left_fit_cr[0]*y_eval*ym_per_pix + left_fit_cr[1])**2)**1.5) / np.absolute(2*left_fit_cr[0])
-    right_curverad = ((1 + (2*right_fit_cr[0]*y_eval*ym_per_pix + right_fit_cr[1])**2)**1.5) / np.absolute(2*right_fit_cr[0])
-    # Now our radius of curvature is in meters
+    # Calculate curvature of lanes in meters
+    right_curverad = calc_curvature(right_raw_x, right_raw_y)
+    left_curverad = calc_curvature(left_raw_x, left_raw_y)
     left_curverad = int(left_curverad)
     right_curverad = int(right_curverad)
     avg_curverad = int((left_curverad + right_curverad) / 2)
 
-    print(' ')
-    print(' ')
-    print(' ')
-
-
-#    left_curverad, right_curverad = calc_curve_rad(left_fit_fofy, right_fit_fofy)
-#    left_curverad  = find_curvature(left_fit_fofy, right_raw_x)
-#    right_curverad  = find_curvature(right_fit_fofy, right_raw_x)
-
-    # Pull points from fit to draw line
+    # Make fit to draw lines on image
     y_vals = np.linspace(0, img_shape[0]-1)
     x_vals = np.linspace(0, img_shape[1]-1)
     y_vals = y_vals.astype(int)
     x_vals = x_vals.astype(int)
-#    print('Max xval = ', np.max(x_vals))
-
-#    left_fit_yvals = left_fit_fofx[0]*x_vals**2 + left_fit_fofx[1]*x_vals + left_fit_fofx[2]
-#    right_fit_yvals = right_fit_fofx[0]*x_vals**2 + right_fit_fofx[1]*x_vals + right_fit_fofx[2]
-
     left_fit_xvals = left_fit_fofy[0]*y_vals**2 + left_fit_fofy[1]*y_vals + left_fit_fofy[2]
     right_fit_xvals = right_fit_fofy[0]*y_vals**2 + right_fit_fofy[1]*y_vals + right_fit_fofy[2]
+    left_fit_xvals = left_fit_xvals.astype(int)
+    right_fit_xvals = right_fit_xvals.astype(int)
 
+    # Calculate offset of car from lane center in meters
+    xm_per_pix = 3.7/700 # meteres per pixel in x dimension
     lane_pos_left = left_fit_xvals[-1] * xm_per_pix
     lane_pos_right = right_fit_xvals[-1] * xm_per_pix
     lane_center = (lane_pos_right + lane_pos_left) / 2
@@ -651,155 +580,65 @@ def proc_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
     offset = image_center - lane_center
     print('left, right, center', lane_pos_left, lane_pos_right, image_center)
     print('Offset = ', '%.3f' % offset)
-    time.wait(500)
-
-
-#    left_fit_yvals = left_fit_yvals.astype(int)
-#    right_fit_yvals = right_fit_yvals.astype(int)
-
-    left_fit_xvals = left_fit_xvals.astype(int)
-    right_fit_xvals = right_fit_xvals.astype(int)
-
-
 
     # Create an image to draw the lines on
-    warp_zero = np.zeros_like(bin_warp_img).astype(np.uint8)
-    color_warp = np.dstack((warp_zero, warp_zero, warp_zero))
-
-    #print('x-vals = ', x_vals)
-    #print('y-vals = ', left_fit_yvals)
-
-    # Recast the x and y points into usable format for cv2.fillPoly()
-    #pts_left = np.array([np.transpose(np.vstack([left_fit_yvals, x_vals]))])
-    #pts_right = np.array([np.flipud(np.transpose(np.vstack([right_fit_yvals, x_vals])))])
-    #pts = np.hstack((pts_left, pts_right))
+    warp_zero = np.zeros_like(img_bin_warp).astype(np.uint8)
+    img_color_warp = np.dstack((warp_zero, warp_zero, warp_zero))
 
     # Recast the x and y points into usable format for cv2.fillPoly()
     pts_left = np.array([np.transpose(np.vstack([left_fit_xvals, y_vals]))])
     pts_right = np.array([np.flipud(np.transpose(np.vstack([right_fit_xvals, y_vals])))])
     pts = np.hstack((pts_left, pts_right))
 
-
     # Plot the re-cast points on the image to double check their integrity
     print(type(pts_left), pts_left.size)
     print(pts_left)
 
-
     # Draw the lane onto the warped blank image
-    cv2.fillPoly(color_warp, np.int_([pts]), (0,255, 0))
+    cv2.fillPoly(img_color_warp, np.int_([pts]), (0,255, 0))
 
-    # Warp the blank back to original image space using inverse perspective matrix (Minv)
-    newwarp = warper(color_warp, Minv)
-    # Combine the result with the original image
-    orig_img = orig_img.astype(np.uint8)
+    # Warp image back to original form and overlay lane shading
+    newwarp = warper(img_color_warp, Minv)
+    img = img.astype(np.uint8)
     newwarp = newwarp.astype(np.uint8)
-    result = cv2.addWeighted(orig_img, 1, newwarp, 0.3, 0)
-    #plt.imshow(result)
+    result = cv2.addWeighted(img, 1, newwarp, 0.3, 0)
 
-
+    # Put text on image and display results
     textstr1 = 'Lane curvature = ' + str(avg_curverad) + ' m'
-    textstr2 = 'Position = ' + str(-99999) + ' m'
-    textstr3 = 'Left lane curvature = ' + str(left_curverad) + ' m'
-    textstr4 = 'Right lane curvature = ' + str(right_curverad) + ' m'
-
+    textstr2 = 'Position = ' + str(offset) + ' m'
+    #textstr3 = 'Left lane curvature = ' + str(left_curverad) + ' m'
+    #textstr4 = 'Right lane curvature = ' + str(right_curverad) + ' m'
     font = cv2.FONT_HERSHEY_SIMPLEX
     cv2.putText(result,textstr1,(400,100), font, 1,(255,255,255),2)
     cv2.putText(result,textstr2,(400,125), font, 1,(255,255,255),2)
-    cv2.putText(result,textstr3,(400,150), font, 1,(255,255,255),2)
-    cv2.putText(result,textstr4,(400,175), font, 1,(255,255,255),2)
-
-
-    f, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(1, 5, figsize=(24, 9))
-    #f.tight_layout()
-
-    ax1.imshow(orig_img)
-    ax1.set_title('Undistorted original image')
-
-    ax2.imshow(bin_img, cmap = 'gray')
-    ax2.set_title('Undistorted binary')
-
-    ax3.imshow(bin_warp_img, cmap = 'gray')
-    ax3.plot(left_fit_xvals, y_vals, c='g', linewidth = 2)
-    ax3.plot(right_fit_xvals, y_vals, c='b', linewidth = 2)
-    ax3.set_title('Undistorted, transformed binary')
-
-    ax4.imshow(color_warp)
-    ax4.set_title('Lanes on binary image')
-
-    ax5.imshow(result)
-    ax5.set_title('Lanes on image')
-
-    plt.show()
-
-
-    print(outdir, name)
-    out_path = os.path.join(outdir, name + '_total_results' + '.png')
-    print(out_path)
-#    f.savefig(out_path)
-
-    f.savefig(out_path, bbox_inches='tight', format='png')
-
-    #time.wait(500)
-
-
+    #cv2.putText(result,textstr3,(400,150), font, 1,(255,255,255),2)
+    #cv2.putText(result,textstr4,(400,175), font, 1,(255,255,255),2)
     cv2.imshow('Annotated final image', result)
     cv2.waitKey(3000)
     cv2.destroyAllWindows()
     out_path = os.path.join(outdir, name + '_annotatedfinal' + '.jpg')
     cv2.imwrite(out_path, result)
 
-
-#     f, axarr = plt.subplots(1, 3, figsize=(24, 9))
-#     axarr[0].im
-#
-# ax1.imshow(img, cmap='gray')
-# ax1.set_title('Pipeline Results', fontsize=40)
-#
-# # Plot up the data
-# ax2.plot(left_line.allx, left_line.ally, 'o', color='red')
-# ax2.plot(right_line.allx, right_line.ally, 'o', color='blue')
-# plt.xlim(0, 1280)
-# plt.ylim(0, 720)
-# ax2.plot(left_line.bestx, left_line.ally, color='green', linewidth=3)
-# ax2.plot(right_line.bestx, right_line.ally, color='green', linewidth=3)
-# plt.gca().invert_yaxis() # to visualize as we do the images
-# ax2.set_title('Line Fits', fontsize=40)
-# plt.subplots_adjust(left=0., right=1, top=0.9, bottom=0.)
-# f.savefig('output_images/line_fit_'+str(idx)+'.jpg')
-
-
-
-
-
-
-    #time.wait(500)
-
-    #fit left and right lane marker samples to 2nd order polynomial
-    #LeftMarker.fit_values = np.polyfit(lefty, leftx, 2)
-    #RightMarker.fit_values = np.polyfit(righty, rightx, 2)
-
-
-    #if save_interm_results:
-    #    cv2.imshow('proc_img_left', zero_right)
-    #    cv2.waitKey(1500)
-    #    cv2.imshow('proc_img_right', zero_left)
-    #    cv2.waitKey(1500)
-    #    cv2.destroyAllWindows()
-
-
-
-
-    calc_lane_curvature()
-
-
-
-
-
-    warp_lanes_to_origimage()
-
-
-    write_annotated_image()
-
+    # Verbosity
+    # Display results
+    f, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(1, 5, figsize=(24, 9))
+    ax1.imshow(img)
+    ax1.set_title('Undistorted original image')
+    ax2.imshow(img_bin, cmap = 'gray')
+    ax2.set_title('Undistorted binary')
+    ax3.imshow(img_bin_warp, cmap = 'gray')
+    ax3.plot(left_fit_xvals, y_vals, c='g', linewidth = 2)
+    ax3.plot(right_fit_xvals, y_vals, c='b', linewidth = 2)
+    ax3.set_title('Undistorted, transformed binary')
+    ax4.imshow(img_color_warp)
+    ax4.set_title('Lanes on binary image')
+    ax5.imshow(result)
+    ax5.set_title('Lanes on image')
+    plt.show()
+    print(outdir, name)
+    out_path = os.path.join(outdir, name + '_total_results' + '.png')
+    print(out_path)
+    f.savefig(out_path, bbox_inches='tight', format='png')
 
     return proc_img
 
@@ -835,7 +674,7 @@ def main():
         for fname in images:
             print('Processing ', fname)
             img = cv2.imread(fname)
-            ret_img = proc_pipeline(objpoints, imgpoints, img, outdir = dir_output_images)
+            ret_img = proc_verbose_pipeline(objpoints, imgpoints, img, outdir = dir_output_images)
             curr_name = fname[-10:-4]
             out_path = os.path.join(dir_output_images, curr_name + '.jpg')
             cv2.imwrite(out_path, ret_img)
@@ -847,7 +686,7 @@ def main():
             print('Processing ', fname)
             img = cv2.imread(fname)
             curr_name = fname[-9:-4]
-            ret_img = proc_pipeline(objpoints, imgpoints, img, save_interm_results = 1,
+            ret_img = proc_verbose_pipeline(objpoints, imgpoints, img, save_interm_results = 1,
                 name = curr_name)
 
     if proc_pipeline_target_images == 0:
