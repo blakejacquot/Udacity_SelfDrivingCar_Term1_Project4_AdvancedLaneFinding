@@ -139,8 +139,8 @@ image with Hough lines down to the ROI specified by the perspective transformati
 
 
 
-<img src="./output_images/ines1_total_results.png" width="70%">
-<img src="./output_images/ines2_total_results.png" width="70%">
+<img src="./output_images/ines1_total_results.png" width="100%">
+<img src="./output_images/ines2_total_results.png" width="120%">
 <img src="./output_images/test1_total_results.png" width="70%">
 <img src="./output_images/test2_total_results.png" width="70%">
 <img src="./output_images/test3_total_results.png" width="70%">

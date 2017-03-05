@@ -62,7 +62,7 @@ Original image
 
 Undistorted image
 
-<img src="./output_images/calibration1_undistorted.jpg" width="70%">
+<img src="./output_images/tion1_undistorted.jpg" width="70%">
 
 ---
 ###Pipeline (single images)
@@ -139,8 +139,6 @@ image with Hough lines down to the ROI specified by the perspective transformati
 
 
 
-
-
 <img src="./output_images/ines1_total_results.png" width="70%">
 <img src="./output_images/ines2_total_results.png" width="70%">
 <img src="./output_images/test1_total_results.png" width="70%">
@@ -151,55 +149,13 @@ image with Hough lines down to the ROI specified by the perspective transformati
 <img src="./output_images/test6_total_results.png" width="70%">
 
 
-<!--
-<table style="width:100%">
-  <tr>
-    <td>Unistorted Image</td>
-    <td>Binary image cropped to ROI</td>
-    <td>Binary image perspective transformed</td>
-  </tr>
-  <tr>
-    <th><img src="./output_images/ines1_undistorted.jpg" width="70%"></th>
-    <th><img src="./output_images/ines1_bin.jpg" width="70%"></th>
-    <th><img src="./output_images/ines1_bin_transform.jpg" width="70%"></th>
-  </tr>
-  <tr>
-    <th><img src="./output_images/ines2_undistorted.jpg" width="70%"></th>
-    <th><img src="./output_images/ines2_bin.jpg" width="70%"></th>
-    <th><img src="./output_images/ines2_bin_transform.jpg" width="70%"></th>
-  </tr>
-  <tr>
-    <th><img src="./output_images/test1_undistorted.jpg" width="70%"></th>
-    <th><img src="./output_images/test1_bin.jpg" width="70%"></th>
-    <th><img src="./output_images/test1_bin_transform.jpg" width="70%"></th>
-  </tr>
-  <tr>
-    <th><img src="./output_images/test2_undistorted.jpg" width="70%"></th>
-    <th><img src="./output_images/test2_bin.jpg" width="70%"></th>
-    <th><img src="./output_images/test2_bin_transform.jpg" width="70%"></th>
-  </tr>
-  <tr>
-    <th><img src="./output_images/test3_undistorted.jpg" width="70%"></th>
-    <th><img src="./output_images/test3_bin.jpg" width="70%"></th>
-    <th><img src="./output_images/test3_bin_transform.jpg" width="70%"></th>
-  </tr>
-  <tr>
-    <th><img src="./output_images/test4_undistorted.jpg" width="70%"></th>
-    <th><img src="./output_images/test4_bin.jpg" width="70%"></th>
-    <th><img src="./output_images/test4_bin_transform.jpg" width="70%"></th>
-  </tr>
-  <tr>
-    <th><img src="./output_images/test5_undistorted.jpg" width="70%"></th>
-    <th><img src="./output_images/test5_bin.jpg" width="70%"></th>
-    <th><img src="./output_images/test5_bin_transform.jpg" width="70%"></th>
-  </tr>
-  <tr>
-    <th><img src="./output_images/test6_undistorted.jpg" width="70%"></th>
-    <th><img src="./output_images/test6_bin.jpg" width="70%"></th>
-    <th><img src="./output_images/test6_bin_transform.jpg" width="70%"></th>
-  </tr>
-</table>
- -->
+
+
+
+
+
+
+
 
 
 -Do hough transform
