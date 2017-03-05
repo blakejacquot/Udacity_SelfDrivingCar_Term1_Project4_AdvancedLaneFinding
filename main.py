@@ -30,7 +30,6 @@ def compute_camera_cal(dir_cal_images):
         imgpoints: List of 2d points in image plane.
 
     """
-    print('Computing camera calibration matrices')
     # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
     num_x = 9 # Number of inside corners in x-direction
     num_y = 6 # Number of inside corners in y-direction
@@ -118,12 +117,9 @@ def region_of_interest(img, vertices):
     if len(img.shape) > 2:
         channel_count = img.shape[2]  # i.e. 3 or 4 depending on your image
         ignore_mask_color = (255,) * channel_count
-        print('Three-channel image')
     else:
         ignore_mask_color = 255
-        print('One-channel image')
 
-    print(ignore_mask_color)
     vertices = vertices.astype(int)
 
     #filling pixels inside the polygon defined by "vertices" with the fill color
@@ -137,10 +133,6 @@ def get_warp_params(img, src, dst):
     """
     Docstring
     """
-
-    # Display info
-    print('src', src)
-    print('dst', dst)
 
     # Calculate perspective parameters for warping and unwarping
     M = cv2.getPerspectiveTransform(src, dst)
@@ -156,12 +148,6 @@ def warper(img, M):
     img_size = (img_shape[1],img_shape[0])
     img_proc = cv2.warpPerspective(img, M, img_size)
     return img_proc
-
-#def unwarp(img, Minv):
-#    img_shape = img.shape
-#    img_size = (img_shape[1],img_shape[0])
-#    return cv2.warpPerspective(img,Minv,img_size)
-#    return img
 
 def draw_lines(img, lines, color=[255, 0, 0], thickness=2):
     """
@@ -216,31 +202,6 @@ def hough_lines(img, rho = 3, theta = np.pi/180, threshold = 10,
     lines = cv2.HoughLinesP(img, rho, theta, threshold, np.array([]),
         minLineLength=min_line_len, maxLineGap=max_line_gap)
     return lines
-
-def mark_lane_pixels():
-    """
-    Docstring
-    """
-    pass
-
-def calc_lane_curvature():
-    """
-    Docstring
-    """
-    pass
-
-def warp_lanes_to_origimage():
-    """
-    Docstring
-    """
-    pass
-
-def write_annotated_image():
-    """
-    Docstring
-    """
-    pass
-
 
 # Calculate directional gradient
 def abs_sobel_thresh(gray, orient='x', sobel_kernel=3, thresh=(0, 255)):
@@ -343,7 +304,6 @@ def make_binary_image(img):
     color_binary[(s_binary > 0) | (combined > 0)] = 1
 
     if np.amax(color_binary) < 200:
-        print('Scaling image')
         color_binary = (color_binary / np.amax(color_binary)) * 255
     return color_binary
 
@@ -386,8 +346,116 @@ def calc_curvature(raw_x, raw_y):
     return curverad
 
 
-def proc_verbose_pipeline(objpoints, imgpoints, img, save_interm_results = 0, name = '',
-    outdir = ''):
+def zero_left_right(img_bin_warp):
+    np.where(img_bin_warp <= 100, img_bin_warp, 0)
+    np.where(img_bin_warp > 100, img_bin_warp, 255)
+    img_shape = img_bin_warp.shape
+    zero_right = img_bin_warp.copy()
+    zero_left = img_bin_warp.copy()
+    zero_right[0:img_shape[0], img_shape[1]/2:img_shape[1]] = 0
+    zero_left[0:img_shape[0], 0:img_shape[1]/2] = 0
+    return zero_right, zero_left
+
+
+def calc_fit(zero_left, zero_right):
+
+    img_shape = zero_left.shape
+
+
+    # Get fit parameters for left lane
+    left_raw_all = np.nonzero(zero_right)
+    left_raw_y = left_raw_all[0]
+    left_raw_x = left_raw_all[1]
+    #left_fit_fofx = np.polyfit(left_raw_x, left_raw_y, 2) # f(x), not f(y)
+    left_fit_fofy = np.polyfit(left_raw_y, left_raw_x, 2) # f(y), not f(x)
+
+    # Get fit parameters for right lane
+    right_raw_all = np.nonzero(zero_left)
+    right_raw_y = right_raw_all[0]
+    right_raw_x = right_raw_all[1]
+    #right_fit_fofx = np.polyfit(right_raw_x, right_raw_y, 2) # f(x), not f(y)
+    right_fit_fofy = np.polyfit(right_raw_y, right_raw_x, 2) # f(y), not f(x)
+
+    # Calculate curvature of lanes in meters
+    right_curverad = calc_curvature(right_raw_x, right_raw_y)
+    left_curverad = calc_curvature(left_raw_x, left_raw_y)
+    left_curverad = int(left_curverad)
+    right_curverad = int(right_curverad)
+    avg_curverad = int((left_curverad + right_curverad) / 2)
+
+    # Make fit to draw lines on image
+    y_vals = np.linspace(0, img_shape[0]-1)
+    x_vals = np.linspace(0, img_shape[1]-1)
+    y_vals = y_vals.astype(int)
+    x_vals = x_vals.astype(int)
+    left_fit_xvals = left_fit_fofy[0]*y_vals**2 + left_fit_fofy[1]*y_vals + left_fit_fofy[2]
+    right_fit_xvals = right_fit_fofy[0]*y_vals**2 + right_fit_fofy[1]*y_vals + right_fit_fofy[2]
+    left_fit_xvals = left_fit_xvals.astype(int)
+    right_fit_xvals = right_fit_xvals.astype(int)
+
+
+    return left_fit_xvals, right_fit_xvals, y_vals, avg_curverad
+
+
+def calc_offset(left_fit_xvals, right_fit_xvals, img_size):
+    xm_per_pix = 3.7/700 # meteres per pixel in x dimension
+    lane_pos_left = left_fit_xvals[-1] * xm_per_pix
+    lane_pos_right = right_fit_xvals[-1] * xm_per_pix
+    lane_center = (lane_pos_right + lane_pos_left) / 2
+    image_center = (img_size[0]/2) * xm_per_pix
+    offset = image_center - lane_center
+    return offset
+
+def shade_lane(img_bin_warp, left_fit_xvals, right_fit_xvals, y_vals):
+
+    # Create an image to draw the lines on
+    warp_zero = np.zeros_like(img_bin_warp).astype(np.uint8)
+    img_color_warp = np.dstack((warp_zero, warp_zero, warp_zero))
+
+    # Recast the x and y points into usable format for cv2.fillPoly()
+    pts_left = np.array([np.transpose(np.vstack([left_fit_xvals, y_vals]))])
+    pts_right = np.array([np.flipud(np.transpose(np.vstack([right_fit_xvals, y_vals])))])
+    pts = np.hstack((pts_left, pts_right))
+
+    # Draw the lane onto the warped blank image
+    cv2.fillPoly(img_color_warp, np.int_([pts]), (0,255, 0))
+
+    return(img_color_warp)
+
+def annotate_image(newwarp, img, avg_curverad, offset):
+
+    img = img.astype(np.uint8)
+    newwarp = newwarp.astype(np.uint8)
+    img_result = cv2.addWeighted(img, 1, newwarp, 0.3, 0)
+
+    # Put text on image
+    textstr1 = 'Lane curvature = ' + str(avg_curverad) + ' m'
+    textstr2 = 'Position = ' + str(offset) + ' m'
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    cv2.putText(img_result,textstr1,(400,100), font, 1,(255,255,255),2)
+    cv2.putText(img_result,textstr2,(400,125), font, 1,(255,255,255),2)
+    return img_result
+
+def make_src_dst(img_shape):
+
+    # Define src points for transform
+    offset_for_obscuration = 50
+    tl_src = (585, 450) # top left
+    tr_src = (720, 450) # top right
+    br_src = (1150, img_shape[0] - offset_for_obscuration) # bottom right
+    bl_src = (225,img_shape[0] - offset_for_obscuration) # bottom left
+    src = np.float32([[tl_src, tr_src, br_src, bl_src]])
+
+    # Define dst points for transform
+    tl_dst = [320, 0] # top left
+    tr_dst = [960, 0] # bottom left
+    br_dst = [960, 720] # top right
+    bl_dst = [320, 720] # bottom right OK
+    dst = np.float32([[tl_dst, tr_dst, br_dst, bl_dst]])
+    return src, dst
+
+
+def proc_pipeline(objpoints, imgpoints, img, verbose, outdir = '', name = ''):
     """ Process verbose image pipline on an image with intermediate states plotted
     and saved.
 
@@ -420,227 +488,58 @@ def proc_verbose_pipeline(objpoints, imgpoints, img, save_interm_results = 0, na
     # Calculate parameters for later use.
     img_shape = img.shape
     img_size = (img_shape[1],img_shape[0])
-
-    # Define src points for transform
-    offset_for_obscuration = 50
-    tl_src = (585, 450) # top left
-    tr_src = (720, 450) # top right
-    br_src = (1150, img_shape[0] - offset_for_obscuration) # bottom right
-    bl_src = (225,img_shape[0] - offset_for_obscuration) # bottom left
-    src = np.float32([[tl_src, tr_src, br_src, bl_src]])
-
-    # Define dst points for transform
-    tl_dst = [320, 0] # top left
-    tr_dst = [960, 0] # bottom left
-    br_dst = [960, 720] # top right
-    bl_dst = [320, 720] # bottom right OK
-    dst = np.float32([[tl_dst, tr_dst, br_dst, bl_dst]])
-
-    # Verbosity: Display original image
-    cv2.imshow('Original image', img)
-    cv2.waitKey(500)
-
+    src, dst = make_src_dst(img_shape)
     img_undistort = undistort_image(objpoints, imgpoints, img)
-
-    # Verbosity
-    if save_interm_results:
-        cv2.imshow('Undistorted image', img_undistort)
-        cv2.waitKey(500)
-        cv2.destroyAllWindows()
-        out_path = os.path.join(outdir, name + '_undistorted' + '.jpg')
-        cv2.imwrite(out_path, img_undistort)
-
     img_roi = region_of_interest(img_undistort, src)
-
-    # Verbosity
-    if save_interm_results:
-        cv2.imshow('roi_img', img_roi)
-        cv2.waitKey(1500)
-        cv2.destroyAllWindows()
-        out_path = os.path.join(outdir, name + '_ROIimg' + '.jpg')
-        cv2.imwrite(out_path, img_roi)
-
-    # Verbosity
-    # Draw region of interest on image
-    lines = np.zeros((4,1,4))
-    lines[0,0,:] = np.array([tl_src[0], tl_src[1], tr_src[0], tr_src[1]]) #tl, tr
-    lines[1,0,:] = np.array([br_src[0], br_src[1], tr_src[0], tr_src[1]]) #tr, br
-    lines[2,0,:] = np.array([br_src[0], br_src[1], bl_src[0], bl_src[1]]) #br, bl
-    lines[3,0,:] = np.array([tl_src[0], tl_src[1], bl_src[0], bl_src[1]]) #bl, tl
-
-    # Verbosity
-    # Draw the region of interest on undistorted image and save results.
-    img_temp = img_roi.copy()
-    img_temp = draw_lines(img_temp, lines)
-    if save_interm_results:
-        cv2.imshow('img', img_temp)
-        cv2.waitKey(500)
-        cv2.destroyAllWindows()
-        out_path = os.path.join(outdir, name + '_drawROI' + '.jpg')
-        cv2.imwrite(out_path, img_temp)
-
-    # Verbosity
-    # Make perspective transformed image from region of interest image and save results
     M, Minv = get_warp_params(img, src, dst)
-    img_roicrop_warp = warper(img_roi, M)
-
-    if save_interm_results:
-        cv2.imshow('Warped image', img_roicrop_warp)
-        cv2.waitKey(500)
-        cv2.destroyAllWindows()
-        out_path = os.path.join(outdir, name + '_perspectivetransformed_drawROI' + '.jpg')
-        cv2.imwrite(out_path, img_roicrop_warp)
-
-    # Verbosity
-    # Warp the blank back to original image space using inverse perspective matrix (Minv)
-    img_newwarp = warper(img_roicrop_warp, Minv)
-
-    # Verbosity
-    # Display intermediate results
-    f, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(24, 9))
-    ax1.imshow(img_undistort)
-    ax1.set_title('Undistorted original image')
-    ax2.imshow(img_roicrop_warp, cmap = 'gray')
-    ax2.set_title('Warped image')
-    ax3.imshow(img_newwarp, cmap = 'gray')
-    ax3.set_title('De-warped image')
-    plt.show()
-
-    # Make binary image
-    img_bin = make_binary_image(img_roicrop_warp)
-
-    # Verbosity
-    if save_interm_results:
-        cv2.imshow('Binary image', img_bin)
-        cv2.waitKey(500)
-        cv2.destroyAllWindows()
-        out_path = os.path.join(outdir, name + '_bin' + '.jpg')
-        cv2.imwrite(out_path, img_bin)
-
-    # Make perspective transformed image.
-    M, Minv = get_warp_params(img, src, dst)
+    img_bin = make_binary_image(img_roi)
     img_bin_warp = warper(img_bin, M)
-
-
-
-    if save_interm_results:
-        cv2.imshow('bin_transform', img_bin_warp)
-        cv2.waitKey(500)
-        cv2.destroyAllWindows()
-        out_path = os.path.join(outdir, name + '_bin_transform' + '.jpg')
-        cv2.imwrite(out_path, img_bin_warp)
-
-
-    # Get zeroed left, zeroed right image for fitting lane pixels.
-    np.where(img_bin_warp <= 100, img_bin_warp, 0)
-    np.where(img_bin_warp > 100, img_bin_warp, 255)
-    img_shape = img_bin_warp.shape
-    zero_right = img_bin_warp.copy()
-    zero_left = img_bin_warp.copy()
-    zero_right[0:img_shape[0], img_shape[1]/2:img_shape[1]] = 0
-    zero_left[0:img_shape[0], 0:img_shape[1]/2] = 0
-
-    # Get fit parameters for left lane
-    left_raw_all = np.nonzero(zero_right)
-    left_raw_y = left_raw_all[0]
-    left_raw_x = left_raw_all[1]
-    left_fit_fofx = np.polyfit(left_raw_x, left_raw_y, 2) # f(x), not f(y)
-    left_fit_fofy = np.polyfit(left_raw_y, left_raw_x, 2) # f(y), not f(x)
-
-    # Get fit parameters for right lane
-    right_raw_all = np.nonzero(zero_left)
-    right_raw_y = right_raw_all[0]
-    right_raw_x = right_raw_all[1]
-    right_fit_fofx = np.polyfit(right_raw_x, right_raw_y, 2) # f(x), not f(y)
-    right_fit_fofy = np.polyfit(right_raw_y, right_raw_x, 2) # f(y), not f(x)
-
-    # Calculate curvature of lanes in meters
-    right_curverad = calc_curvature(right_raw_x, right_raw_y)
-    left_curverad = calc_curvature(left_raw_x, left_raw_y)
-    left_curverad = int(left_curverad)
-    right_curverad = int(right_curverad)
-    avg_curverad = int((left_curverad + right_curverad) / 2)
-
-    # Make fit to draw lines on image
-    y_vals = np.linspace(0, img_shape[0]-1)
-    x_vals = np.linspace(0, img_shape[1]-1)
-    y_vals = y_vals.astype(int)
-    x_vals = x_vals.astype(int)
-    left_fit_xvals = left_fit_fofy[0]*y_vals**2 + left_fit_fofy[1]*y_vals + left_fit_fofy[2]
-    right_fit_xvals = right_fit_fofy[0]*y_vals**2 + right_fit_fofy[1]*y_vals + right_fit_fofy[2]
-    left_fit_xvals = left_fit_xvals.astype(int)
-    right_fit_xvals = right_fit_xvals.astype(int)
-
-    # Calculate offset of car from lane center in meters
-    xm_per_pix = 3.7/700 # meteres per pixel in x dimension
-    lane_pos_left = left_fit_xvals[-1] * xm_per_pix
-    lane_pos_right = right_fit_xvals[-1] * xm_per_pix
-    lane_center = (lane_pos_right + lane_pos_left) / 2
-    image_center = (img_size[0]/2) * xm_per_pix
-    offset = image_center - lane_center
-    print('left, right, center', lane_pos_left, lane_pos_right, image_center)
-    print('Offset = ', '%.3f' % offset)
-
-    # Create an image to draw the lines on
-    warp_zero = np.zeros_like(img_bin_warp).astype(np.uint8)
-    img_color_warp = np.dstack((warp_zero, warp_zero, warp_zero))
-
-    # Recast the x and y points into usable format for cv2.fillPoly()
-    pts_left = np.array([np.transpose(np.vstack([left_fit_xvals, y_vals]))])
-    pts_right = np.array([np.flipud(np.transpose(np.vstack([right_fit_xvals, y_vals])))])
-    pts = np.hstack((pts_left, pts_right))
-
-    # Plot the re-cast points on the image to double check their integrity
-    print(type(pts_left), pts_left.size)
-    print(pts_left)
-
-    # Draw the lane onto the warped blank image
-    cv2.fillPoly(img_color_warp, np.int_([pts]), (0,255, 0))
-
-    # Warp image back to original form and overlay lane shading
+    zero_right, zero_left = zero_left_right(img_bin_warp)
+    left_fit_xvals, right_fit_xvals, y_vals, avg_curverad = calc_fit(zero_left, zero_right)
+    offset = calc_offset(left_fit_xvals, right_fit_xvals, img_size)
+    img_color_warp = shade_lane(img_bin_warp, left_fit_xvals, right_fit_xvals, y_vals)
     newwarp = warper(img_color_warp, Minv)
-    img = img.astype(np.uint8)
-    newwarp = newwarp.astype(np.uint8)
-    result = cv2.addWeighted(img, 1, newwarp, 0.3, 0)
+    img_result = annotate_image(newwarp, img, avg_curverad, offset)
 
-    # Put text on image and display results
-    textstr1 = 'Lane curvature = ' + str(avg_curverad) + ' m'
-    textstr2 = 'Position = ' + str(offset) + ' m'
-    #textstr3 = 'Left lane curvature = ' + str(left_curverad) + ' m'
-    #textstr4 = 'Right lane curvature = ' + str(right_curverad) + ' m'
-    font = cv2.FONT_HERSHEY_SIMPLEX
-    cv2.putText(result,textstr1,(400,100), font, 1,(255,255,255),2)
-    cv2.putText(result,textstr2,(400,125), font, 1,(255,255,255),2)
-    #cv2.putText(result,textstr3,(400,150), font, 1,(255,255,255),2)
-    #cv2.putText(result,textstr4,(400,175), font, 1,(255,255,255),2)
-    cv2.imshow('Annotated final image', result)
-    cv2.waitKey(3000)
-    cv2.destroyAllWindows()
-    out_path = os.path.join(outdir, name + '_annotatedfinal' + '.jpg')
-    cv2.imwrite(out_path, result)
+    if verbose:
+        img_roicrop_warp = warper(img_roi, M)
+        img_newwarp = warper(img_roicrop_warp, Minv)
 
-    # Verbosity
-    # Display results
-    f, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(1, 5, figsize=(24, 9))
-    ax1.imshow(img)
-    ax1.set_title('Undistorted original image')
-    ax2.imshow(img_bin, cmap = 'gray')
-    ax2.set_title('Undistorted binary')
-    ax3.imshow(img_bin_warp, cmap = 'gray')
-    ax3.plot(left_fit_xvals, y_vals, c='g', linewidth = 2)
-    ax3.plot(right_fit_xvals, y_vals, c='b', linewidth = 2)
-    ax3.set_title('Undistorted, transformed binary')
-    ax4.imshow(img_color_warp)
-    ax4.set_title('Lanes on binary image')
-    ax5.imshow(result)
-    ax5.set_title('Lanes on image')
-    plt.show()
-    print(outdir, name)
-    out_path = os.path.join(outdir, name + '_total_results' + '.png')
-    print(out_path)
-    f.savefig(out_path, bbox_inches='tight', format='png')
+        # Make figure of all intermediate results
+        f, ((ax1, ax2, ax3), (ax4, ax5, ax6), (ax7, ax8, ax9)) = plt.subplots(3, 3, figsize=(24, 9))
+        ax1.imshow(img_undistort)
+        ax1.set_title('Undistorted original image')
+        ax2.imshow(img_roicrop_warp, cmap = 'gray')
+        ax2.set_title('Warped image cropped to ROI')
+        ax3.imshow(img_newwarp, cmap = 'gray')
+        ax3.set_title('De-warped image (to show it can be done)')
+        ax4.imshow(img_bin, cmap = 'gray')
+        ax4.set_title('Undistorted binary')
+        ax5.imshow(img_bin_warp, cmap = 'gray')
+        ax5.plot(left_fit_xvals, y_vals, c='g', linewidth = 2)
+        ax5.plot(right_fit_xvals, y_vals, c='b', linewidth = 2)
+        ax5.set_title('Transform binary and fit lanes')
+        ax6.imshow(img_color_warp)
+        ax6.set_title('Lane shaded on binary image')
+        ax7.imshow(img_result)
+        ax7.set_title('Annotated, undistorted image')
+        plt.show()
+        out_path = os.path.join(outdir, name + '_total_results' + '.png')
+        print(' ')
+        print('outdir = ', outdir)
+        print('name = ', name)
+        print('out_path = ', out_path)
+        print(' ')
+        f.savefig(out_path, bbox_inches='tight', format='png')
 
-    return proc_img
+        # Show large version of annotated final image
+        cv2.imshow('Annotated final image', img_result)
+        cv2.waitKey(1000)
+        cv2.destroyAllWindows()
+        out_path = os.path.join(outdir, name + '_annotatedfinal' + '.jpg')
+        cv2.imwrite(out_path, img_result)
+
+    return img_result
 
 
 def main():
@@ -655,6 +554,7 @@ def main():
     proc_pipeline_cal_images = 0
     proc_pipeline_test_images = 1
     proc_pipeline_target_images = 0
+    verbose = True
 
     if proc_distortion_data == 1:
         objpoints, imgpoints = compute_camera_cal(dir_cal_images)
@@ -662,7 +562,6 @@ def main():
         pickle_data["objpoints"] = objpoints
         pickle_data["imgpoints"] = imgpoints
         pickle.dump( pickle_data, open("calibration_data.p", "wb" ))
-
 
     pickle_data = pickle.load(open("calibration_data.p","rb"))
     objpoints = pickle_data["objpoints"]
@@ -672,22 +571,17 @@ def main():
         search_phrase = os.path.join(dir_cal_images, '*.jpg')
         images = glob.glob(search_phrase)
         for fname in images:
-            print('Processing ', fname)
             img = cv2.imread(fname)
-            ret_img = proc_verbose_pipeline(objpoints, imgpoints, img, outdir = dir_output_images)
-            curr_name = fname[-10:-4]
-            out_path = os.path.join(dir_output_images, curr_name + '.jpg')
-            cv2.imwrite(out_path, ret_img)
+            curr_name = fname[-9:-4]
+            ret_img = proc_pipeline(objpoints, imgpoints, img, verbose, outdir = dir_output_images, name = curr_name)
 
     if proc_pipeline_test_images == 1:
         search_phrase = os.path.join(dir_test_images, '*.jpg')
         images = glob.glob(search_phrase)
         for fname in images:
-            print('Processing ', fname)
             img = cv2.imread(fname)
             curr_name = fname[-9:-4]
-            ret_img = proc_verbose_pipeline(objpoints, imgpoints, img, save_interm_results = 1,
-                name = curr_name)
+            ret_img = proc_pipeline(objpoints, imgpoints, img, verbose, outdir = dir_output_images, name = curr_name)
 
     if proc_pipeline_target_images == 0:
         print(dir_output_images)
