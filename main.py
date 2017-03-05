@@ -506,7 +506,7 @@ def proc_pipeline(objpoints, imgpoints, img, verbose, outdir = '', name = ''):
         img_newwarp = warper(img_roicrop_warp, Minv)
 
         # Make figure of all intermediate results
-        f, ((ax1, ax2, ax3), (ax4, ax5, ax6), (ax7, ax8, ax9)) = plt.subplots(3, 3, figsize=(24, 9))
+        f, ((ax1, ax2, ax3), (ax4, ax5, ax6), (ax7, ax8, ax9)) = plt.subplots(3, 3, figsize=(30, 12))
         ax1.imshow(img_undistort)
         ax1.set_title('Undistorted original image')
         ax2.imshow(img_roicrop_warp, cmap = 'gray')
@@ -551,8 +551,8 @@ def main():
     dir_output_images = os.path.join('output_images')
 
     proc_distortion_data = 0
-    proc_pipeline_cal_images = 1
-    proc_pipeline_test_images = 0
+    proc_pipeline_cal_images = 0
+    proc_pipeline_test_images = 1
     proc_pipeline_target_images = 0
     verbose = True
 

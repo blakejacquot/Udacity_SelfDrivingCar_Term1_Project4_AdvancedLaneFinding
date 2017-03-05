@@ -506,7 +506,7 @@ def proc_pipeline(objpoints, imgpoints, img, verbose, outdir = '', name = ''):
         img_newwarp = warper(img_roicrop_warp, Minv)
 
         # Make figure of all intermediate results
-        f, ((ax1, ax2, ax3), (ax4, ax5, ax6), (ax7, ax8, ax9)) = plt.subplots(3, 3, figsize=(24, 9))
+        f, ((ax1, ax2, ax3), (ax4, ax5, ax6), (ax7, ax8, ax9)) = plt.subplots(3, 3, figsize=(30, 12))
         ax1.imshow(img_undistort)
         ax1.set_title('Undistorted original image')
         ax2.imshow(img_roicrop_warp, cmap = 'gray')
@@ -574,7 +574,7 @@ def main():
             img = cv2.imread(fname)
             img_undistort = undistort_image(objpoints, imgpoints, img)
             curr_name = fname[-9:-4]
-            out_path = os.path.join(dir_output_images, curr_name + '_annotatedfinal' + '.jpg')
+            out_path = os.path.join(dir_output_images, curr_name + '_undistorted' + '.jpg')
             cv2.imshow('Undistorted checkerboard', img_undistort)
             cv2.waitKey(500)
             cv2.destroyAllWindows()
