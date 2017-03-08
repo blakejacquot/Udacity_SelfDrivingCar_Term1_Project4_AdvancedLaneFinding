@@ -94,7 +94,7 @@ the resulting region of interest on straight lane lines and the transform of thi
 
 Undistorted image with source points drawn:
 
-<img src="./output_images/ines1_drawROI.jpg.jpg" width="70%">
+<img src="./output_images/ines1_drawROI.jpg" width="70%">
 
 Transformed image:
 

@@ -23,7 +23,7 @@ and vehicle position. (DONE)
 ###Writeup / README
 
 All functions are contained within 'main.py'. The main pipeline is run with the 'proc_pipeline'
-function.
+function. Only the obtaining of original distortion parameters is housed outside the pipeline.
 
 ####1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.
 
