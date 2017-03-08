@@ -551,8 +551,8 @@ def main():
     dir_output_images = os.path.join('output_images')
 
     proc_distortion_data = 0
-    proc_pipeline_cal_images = 1
-    proc_pipeline_test_images = 0
+    proc_pipeline_cal_images = 0
+    proc_pipeline_test_images = 1
     proc_pipeline_target_images = 0
     verbose = True
 

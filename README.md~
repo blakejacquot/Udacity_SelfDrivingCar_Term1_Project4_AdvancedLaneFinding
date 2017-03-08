@@ -15,17 +15,7 @@ chessboard images. (DONE)
 * Output visual display of the lane boundaries and numerical estimation of lane curvature
 and vehicle position. (Not Done)
 
-[//]: # (Image References)
-[image1]: ./examples/undistort_output.png "Undistorted"
-[image2]: ./test_images/test1.jpg "Road Transformed"
-[image3]: ./examples/binary_combo_example.jpg "Binary Example"
-[image4]: ./examples/warped_straight_lines.jpg "Warp Example"
-[image5]: ./examples/color_fit_lines.jpg "Fit Visual"
-[image6]: ./examples/example_output.jpg "Output"
-[video1]: ./project_video.mp4 "Video"
-
 [t1p1_link]: https://github.com/blakejacquot/udacity_SDC_T1P1_LaneFinding/blob/master/P1.ipynb
-
 
 ##[Rubric](https://review.udacity.com/#!/rubrics/571/view) Responses
 
@@ -36,24 +26,15 @@ and vehicle position. (Not Done)
 
 You are  reading it.
 
-
 ###Camera Calibration
 ####1. Briefly state how you computed the camera matrix and distortion coefficients.
 The code for this step is in `compute_camera_cal` and `undistort_image` functions from
 file `main.py`.
 
-I start by preparing "object points", which will be the (x, y, z) coordinates of the
-chessboard corners in the world. Here I am assuming the chessboard is fixed on the (x, y)
- plane at z=0, such that the object points are the same for each calibration image.
-  Thus, `objp` is just a replicated array of coordinates, and `objpoints` will be
-  appended with a copy of it every time I successfully detect all chessboard corners in
-  a test image.  `imgpoints` will be appended with the (x, y) pixel position of each of
-  the corners in the image plane with each successful chessboard detection.
+Make 'objpoints', which will hold the x, y, z chessboard coordinates. The variable 'imgpoints'
+has the x, y pixel positions for each corner where there was a successful detection.
 
-I then used the output `objpoints` and `imgpoints` to compute the camera calibration and
-distortion coefficients using the `cv2.calibrateCamera()` function.  I applied this
-distortion correction to the test image using the `cv2.undistort()` function and
-obtained this result:
+Use these two variables to compute camera calibration. Driving function is 'cv2.undistort'
 
 Original image
 
@@ -69,7 +50,7 @@ Undistorted image
 
 ####1. Provide an example of a distortion-corrected image.
 Read in calibration parameters from pickle file and use `undistort_image` function from
-file `main.py`. The undistortion is subtle, but present.
+file `main.py`. The undistortion is subtle.
 
 Original image
 
@@ -84,10 +65,10 @@ Undistorted image
 ####2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 My method borrows heavily from my [first project][t1p1_link] in this course.
 
-The order of operations is:
+The general order of operations is:
 1. Grayscale image.
 2. Gaussian blur image with kernel of specified size.
-3. Apply Canny edge detection.
+3. Apply edge detection.
 
 Code for making binary image is in `make_binary_image` function of file `main.py`.
 
@@ -103,18 +84,14 @@ Binary image
 Code for perspective transform includes a function called `warper()` from file `main.py`.
 The function `warper()` takes an image parameters calculated from the `get_warp_params`
 function. `get_warp_params` calculates the source and destination points for the transform.
-Source points are selected to crop the original image to the area containing probably lane
-lines.
-
-Sanity check that straight lines are transformed as straight lines.
+Source points are selected to crop the original image to the area containing lanes.
 
 After choosing the source points for the transform, I sanity-checked results by looking at
 the resulting region of interest on straight lane lines and the transform of this image.
 
 Undistorted image with source points drawn:
 
-<img src="./output_images/test1_drawROI.jpg" width="70%">
-
+<img src="./output_images/ines1_drawROI.jpg.jpg" width="70%">
 
 Transformed image:
 
@@ -139,22 +116,6 @@ image with Hough lines down to the ROI specified by the perspective transformati
 
 
 
-<img src="./output_images/ines1_total_results.png" width="100%">
-<br>
-<img src="./output_images/ines2_total_results.png" width="100%">
-<br>
-<img src="./output_images/test1_total_results.png" width="100%">
-<br>
-<img src="./output_images/test2_total_results.png" width="100%">
-<br>
-<img src="./output_images/test3_total_results.png" width="100%">
-<br>
-<img src="./output_images/test4_total_results.png" width="100%">
-<br>
-<img src="./output_images/test5_total_results.png" width="100%">
-<br>
-<img src="./output_images/test6_total_results.png" width="100%">
-<br>
 
 
 
@@ -193,13 +154,10 @@ I verified that my perspective transform was working as expected by drawing the 
 `dst` points onto a test image and its warped counterpart to verify that the lines appear
 parallel in the warped image.
 
-![alt text][image4]
 
 
 Then I did some other stuff and fit my lane lines with a 2nd order polynomial kinda like
 this:
-
-![alt text][image5]
 
 ####5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
@@ -210,7 +168,19 @@ I did this in lines # through # in my code in `my_other_file.py`
 I implemented this step in lines # through # in my code in `yet_another_file.py` in the
 function `map_lane()`.  Here is an example of my result on a test image:
 
-![alt text][image6]
+<img src="./output_images/ines1_total_results.png" width="100%"><br><br><br><br><br><br>
+
+
+####6. Examples of pipeline operating on all provided test images.
+<img src="./output_images/ines1_total_results.png" width="100%"><br><br><br><br><br><br>
+<img src="./output_images/ines2_total_results.png" width="100%"><br><br><br><br><br><br>
+<img src="./output_images/test1_total_results.png" width="100%"><br><br><br><br><br><br>
+<img src="./output_images/test2_total_results.png" width="100%"><br><br><br><br><br><br>
+<img src="./output_images/test3_total_results.png" width="100%"><br><br><br><br><br><br>
+<img src="./output_images/test4_total_results.png" width="100%"><br><br><br><br><br><br>
+<img src="./output_images/test5_total_results.png" width="100%"><br><br><br><br><br><br>
+<img src="./output_images/test6_total_results.png" width="100%"><br><br><br><br><br><br>
+
 
 ---
 

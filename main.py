@@ -267,15 +267,6 @@ def make_binary_image(img):
     img_blur_gray = gaussian_blur(gray_image, ksize)
 
     ksize = 3
-#    gradx = abs_sobel_thresh(img_blur_gray, orient='x', sobel_kernel=ksize, thresh=(10, 255))
-#    grady = abs_sobel_thresh(img_blur_gray, orient='y', sobel_kernel=ksize, thresh=(60, 255))
-#    mag_binary = mag_thresh(img_blur_gray, sobel_kernel=ksize, mag_thresh=(40, 255))
-#    dir_binary = dir_threshold(img_blur_gray, sobel_kernel=ksize, thresh=(.65, 1.05))
-
-    gradx = abs_sobel_thresh(img_blur_gray, orient='x', sobel_kernel=ksize, thresh=(200, 255))
-    grady = abs_sobel_thresh(img_blur_gray, orient='y', sobel_kernel=ksize, thresh=(200, 255))
-    mag_binary = mag_thresh(img_blur_gray, sobel_kernel=ksize, mag_thresh=(200, 255))
-    dir_binary = dir_threshold(img_blur_gray, sobel_kernel=ksize, thresh=(.95, 1.05))
 
     gradx = abs_sobel_thresh(img_blur_gray, orient='x', sobel_kernel=ksize, thresh=(10, 255))
     grady = abs_sobel_thresh(img_blur_gray, orient='y', sobel_kernel=ksize, thresh=(60, 255))
