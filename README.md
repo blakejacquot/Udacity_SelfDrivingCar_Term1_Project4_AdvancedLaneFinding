@@ -135,7 +135,7 @@ curvature.
 
 This is the last section 'proc_pipeline'. An example image is:
 
-<img src="./output_images/test2_annotatedfinal.png" width="100%">
+<img src="./output_images/test2_annotatedfinal.jpg" width="100%">
 
 ####6. Examples of pipeline operating on all provided test images.
 

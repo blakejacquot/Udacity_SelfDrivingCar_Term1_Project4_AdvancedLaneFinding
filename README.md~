@@ -79,7 +79,7 @@ Here is an example of my output for this step:
 
 Binary image
 
-<img src="./output_images/test2_annotatedfinal.jpg" width="70%">
+<img src="./output_images/test2_bin.jpg" width="70%">
 
 
 ####3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
@@ -135,8 +135,7 @@ curvature.
 
 This is the last section 'proc_pipeline'. An example image is:
 
-<img src="./output_images/ines1_total_results.png" width="100%"><br><br><br><br><br><br>
-
+<img src="./output_images/test2_annotatedfinal.png" width="100%">
 
 ####6. Examples of pipeline operating on all provided test images.
 
