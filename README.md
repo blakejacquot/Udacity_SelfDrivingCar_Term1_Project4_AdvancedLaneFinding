@@ -8,12 +8,12 @@ The goals / steps of this project are:
 chessboard images. (DONE)
 * Apply a distortion correction to raw images. (DONE)
 * Use color transforms, gradients, etc., to create a thresholded binary image. (DONE)
-* Apply a perspective transform to rectify binary image ("birds-eye view"). (Not Done)
-* Detect lane pixels and fit to find the lane boundary. (Not Done)
-* Determine the curvature of the lane and vehicle position with respect to center. (Not Done)
-* Warp the detected lane boundaries back onto the original image. (Not Done)
+* Apply a perspective transform to rectify binary image ("birds-eye view"). (DONE)
+* Detect lane pixels and fit to find the lane boundary. (DONE)
+* Determine the curvature of the lane and vehicle position with respect to center. (DONE)
+* Warp the detected lane boundaries back onto the original image. (DONE)
 * Output visual display of the lane boundaries and numerical estimation of lane curvature
-and vehicle position. (Not Done)
+and vehicle position. (DONE)
 
 [t1p1_link]: https://github.com/blakejacquot/udacity_SDC_T1P1_LaneFinding/blob/master/P1.ipynb
 
@@ -21,6 +21,9 @@ and vehicle position. (Not Done)
 
 
 ###Writeup / README
+
+All functions are contained within 'main.py'. The main pipeline is run with the 'proc_pipeline'
+function. Only the obtaining of original distortion parameters is housed outside the pipeline.
 
 ####1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.
 
