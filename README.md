@@ -111,76 +111,26 @@ tr = top right, bl = bottom left
 
 ####4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
-To identify lane-line pixels, start with a Hough transformation to ... Next crop the binary
-image with Hough lines down to the ROI specified by the perspective transformation.
+Make a copy of the binary, perspective-transformed image
 
+Use 'zero_left_right' to get two binary, perspective-transformed images: one with left
+half zeroed out and one with right half zeroed out. Use 'calc_fit' to get fits for both
+lanes as well as curvature. Fitting is done with second-order polynomial in a f(y) rather
+than f(x) manner. The reason is that the x-range is very compressed (same x-value maps to
+lots of y values). But for every y-value there is one or few x-values.
 
-
-
-
-
-
-    img_shape = img.shape
-    img_size = (img_shape[1],img_shape[0])
-    src, dst = make_src_dst(img_shape)
-    img_undistort = undistort_image(objpoints, imgpoints, img)
-    img_roi = region_of_interest(img_undistort, src)
-    M, Minv = get_warp_params(img, src, dst)
-    img_bin = make_binary_image(img_roi)
-    img_bin_warp = warper(img_bin, M)
-    zero_right, zero_left = zero_left_right(img_bin_warp)
-    left_fit_xvals, right_fit_xvals, y_vals, avg_curverad = calc_fit(zero_left, zero_right)
-    offset = calc_offset(left_fit_xvals, right_fit_xvals, img_size)
-    img_color_warp = shade_lane(img_bin_warp, left_fit_xvals, right_fit_xvals, y_vals)
-    newwarp = warper(img_color_warp, Minv)
-    img_result = annotate_image(newwarp, img, avg_curverad, offset)
-
-
-
-
-
-
-
-
--Do hough transform
--Crop to ROI
--Fit points on left
--Fit points on right
-
-
-
-TBD
-TBD
-TBD
-TBD
-TBD
-TBD
-TBD
-TBD
-TBD
-TBD
-TBD
-TBD
-
-
-
-I verified that my perspective transform was working as expected by drawing the `src` and
-`dst` points onto a test image and its warped counterpart to verify that the lines appear
-parallel in the warped image.
-
-
-
-Then I did some other stuff and fit my lane lines with a 2nd order polynomial kinda like
-this:
+Examples of fitting are found in composite images below.
 
 ####5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
-I did this in lines # through # in my code in `my_other_file.py`
+This falls out of 'calc_fit' function, which has a call to 'calc_curvature'. This defines
+meters per pixel in x and y directions and then gets polyfit parameters and calculates
+curvature.
+
 
 ####6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
-I implemented this step in lines # through # in my code in `yet_another_file.py` in the
-function `map_lane()`.  Here is an example of my result on a test image:
+This is the last section 'proc_pipeline'. An example image is:
 
 <img src="./output_images/ines1_total_results.png" width="100%"><br><br><br><br><br><br>
 

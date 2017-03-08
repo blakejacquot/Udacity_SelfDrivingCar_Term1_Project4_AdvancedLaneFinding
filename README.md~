@@ -120,6 +120,20 @@ image with Hough lines down to the ROI specified by the perspective transformati
 
 
 
+    img_shape = img.shape
+    img_size = (img_shape[1],img_shape[0])
+    src, dst = make_src_dst(img_shape)
+    img_undistort = undistort_image(objpoints, imgpoints, img)
+    img_roi = region_of_interest(img_undistort, src)
+    M, Minv = get_warp_params(img, src, dst)
+    img_bin = make_binary_image(img_roi)
+    img_bin_warp = warper(img_bin, M)
+    zero_right, zero_left = zero_left_right(img_bin_warp)
+    left_fit_xvals, right_fit_xvals, y_vals, avg_curverad = calc_fit(zero_left, zero_right)
+    offset = calc_offset(left_fit_xvals, right_fit_xvals, img_size)
+    img_color_warp = shade_lane(img_bin_warp, left_fit_xvals, right_fit_xvals, y_vals)
+    newwarp = warper(img_color_warp, Minv)
+    img_result = annotate_image(newwarp, img, avg_curverad, offset)
 
 
 
@@ -172,6 +186,22 @@ function `map_lane()`.  Here is an example of my result on a test image:
 
 
 ####6. Examples of pipeline operating on all provided test images.
+
+The entire pipeline is in 'main.py' in 'proc_pipeline' function. Briefly it:
+
+1. Calculates source and destination matrices for warping.
+2. Undistorts image.
+3. Crops to region of interest.
+4. Makes warp parameters.
+5. Makes this into binary image.
+6. Warps binary image.
+7. Fits lanes and calculates curvature.
+8. Calculates offset.
+9. Shade lane and dewarp.
+10. Annotate final image.
+
+Below are examples of running the entire pipeline on the provided test images.
+
 <img src="./output_images/ines1_total_results.png" width="100%"><br><br><br><br><br><br>
 <img src="./output_images/ines2_total_results.png" width="100%"><br><br><br><br><br><br>
 <img src="./output_images/test1_total_results.png" width="100%"><br><br><br><br><br><br>
