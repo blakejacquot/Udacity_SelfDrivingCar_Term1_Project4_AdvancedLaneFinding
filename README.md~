@@ -152,16 +152,16 @@ The entire pipeline is in 'main.py' in 'proc_pipeline' function. Briefly it:
 9. Shade lane and dewarp.
 10. Annotate final image.
 
-Below are examples of running the entire pipeline on the provided test images.
+Below are examples of running the entire pipeline on sample provided test images.
 
-<img src="./output_images/ines1_total_results.png" width="100%"><br><br><br>
+<img src="./output_images/ines1_total_results_xxx.png" width="100%"><br><br><br>
 <img src="./output_images/ines2_total_results.png" width="100%"><br><br><br>
-<img src="./output_images/test1_total_results.png" width="100%"><br><br><br>
+<img src="./output_images/test1_total_results_xxx.png" width="100%"><br><br><br>
 <img src="./output_images/test2_total_results.png" width="100%"><br><br><br>
 <img src="./output_images/test3_total_results.png" width="100%"><br><br><br>
-<img src="./output_images/test4_total_results.png" width="100%"><br><br><br>
-<img src="./output_images/test5_total_results.png" width="100%"><br><br><br>
-<img src="./output_images/test6_total_results.png" width="100%"><br><br><br>
+<img src="./output_images/test4_total_results_xxx.png" width="100%"><br><br><br>
+<img src="./output_images/test5_total_results_xxx.png" width="100%"><br><br><br>
+<img src="./output_images/test6_total_results_xxx.png" width="100%"><br><br><br>
 
 ---
 
