@@ -16,7 +16,7 @@ chessboard images. (DONE)
 and vehicle position. (DONE)
 
 [t1p1_link]: https://github.com/blakejacquot/udacity_SDC_T1P1_LaneFinding/blob/master/P1.ipynb
-[vid1_link]: https://github.com/blakejacquot/udacity_sdc_T1P4_AdvancedLaneFinding/project_video_processed.mp4
+[vid1_link]: https://github.com/blakejacquot/udacity_sdc_T1P4_AdvancedLaneFinding/blob/master/project_video_processed.mp4
 ##[Rubric](https://review.udacity.com/#!/rubrics/571/view) Responses
 
 
