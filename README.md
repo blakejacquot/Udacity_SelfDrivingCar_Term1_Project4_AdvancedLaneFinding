@@ -172,7 +172,22 @@ Here's a [link to my video result][vid1_link]
 
 ####1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-TBD
+Issue 1: Shadows
+The code isn't tolerant to shadows and sometimes interprets them as lane lines. A step towards
+making it more robust would be more accurate masking. Also, may play around with different
+color channels for screening.
+
+Issue 2: Hysteresis
+I had problems implementing the Line() class to compare current frame results to past frames.
+My idea was clear, but I couldn't figure out how to fold it into the following lines and
+subsequent function calls:
+'out_clip = in_clip.fl_image(proc_video_pipeline)'
+'out_clip.write_videofile(output, audio=False)'
+
+My idea was to have the class hold all lane variables for last 'n' frames. Then do median
+filter on left curvature to get best left lane fit and repeat this for right. The assumption is
+that median filtering is least likely to be a wacky fit. Then additional checks could be done
+on the curvature before overlaying the shaded lane.
 
 
 Here I'll talk about the approach I took, what techniques I used, what worked and why,
