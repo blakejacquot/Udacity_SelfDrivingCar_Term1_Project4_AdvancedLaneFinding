@@ -298,33 +298,6 @@ def make_binary_image(img):
         color_binary = (color_binary / np.amax(color_binary)) * 255
     return color_binary
 
-
-# Define a class to receive the characteristics of each line detection
-class Line():
-    def __init__(self):
-        # was the line detected in the last iteration?
-        self.detected = False
-        # x values of the last n fits of the line
-        self.recent_xfitted = []
-        #average x values of the fitted line over the last n iterations
-        self.bestx = None
-        #polynomial coefficients averaged over the last n iterations
-        self.best_fit = None
-        #polynomial coefficients for the most recent fit
-        self.current_fit = [np.array([False])]
-        #radius of curvature of the line in some units
-        self.radius_of_curvature = None
-        #distance in meters of vehicle center from the line
-        self.line_base_pos = None
-        #difference in fit coefficients between last and new fits
-        self.diffs = np.array([0,0,0], dtype='float')
-        #x values for detected line pixels
-        self.allx = None
-        #y values for detected line pixels
-        self.ally = None
-
-
-
 def calc_curvature(raw_x, raw_y):
     # Shoehorn into Udacity framework
     # Define conversions in x and y from pixels space to meters
@@ -385,7 +358,7 @@ def calc_fit(zero_left, zero_right):
     right_fit_xvals = right_fit_xvals.astype(int)
 
 
-    return left_fit_xvals, right_fit_xvals, y_vals, avg_curverad
+    return left_fit_xvals, right_fit_xvals, y_vals, avg_curverad, left_curverad, right_curverad
 
 
 def calc_offset(left_fit_xvals, right_fit_xvals, img_size):
@@ -398,7 +371,6 @@ def calc_offset(left_fit_xvals, right_fit_xvals, img_size):
     return offset
 
 def shade_lane(img_bin_warp, left_fit_xvals, right_fit_xvals, y_vals):
-
     # Create an image to draw the lines on
     warp_zero = np.zeros_like(img_bin_warp).astype(np.uint8)
     img_color_warp = np.dstack((warp_zero, warp_zero, warp_zero))
@@ -414,7 +386,6 @@ def shade_lane(img_bin_warp, left_fit_xvals, right_fit_xvals, y_vals):
     return(img_color_warp)
 
 def annotate_image(newwarp, img, avg_curverad, offset):
-
     img = img.astype(np.uint8)
     newwarp = newwarp.astype(np.uint8)
     img_result = cv2.addWeighted(img, 1, newwarp, 0.3, 0)
@@ -428,7 +399,6 @@ def annotate_image(newwarp, img, avg_curverad, offset):
     return img_result
 
 def make_src_dst(img_shape):
-
     # Define src points for transform
     offset_for_obscuration = 50
     tl_src = (585, 450) # top left
@@ -445,8 +415,40 @@ def make_src_dst(img_shape):
     dst = np.float32([[tl_dst, tr_dst, br_dst, bl_dst]])
     return src, dst
 
+# Define a class to receive the characteristics of each line detection
+class Line():
+    def __init__(self):
+       # # was the line detected in the last iteration?
+       # self.detected = False
+       # # x values of the last n fits of the line
+       # self.recent_xfitted = []
+       # #average x values of the fitted line over the last n iterations
+       # self.bestx = None
+       # #polynomial coefficients averaged over the last n iterations
+       # self.best_fit = None
+       # #polynomial coefficients for the most recent fit
+       # self.current_fit = [np.array([False])]
+       # #radius of curvature of the line in some units
+       # self.radius_of_curvature = None
+       # #distance in meters of vehicle center from the line
+       # self.line_base_pos = None
+       # #difference in fit coefficients between last and new fits
+       # self.diffs = np.array([0,0,0], dtype='float')
+       # #x values for detected line pixels
+       # self.allx = None
+       # #y values for detected line pixels
+       # self.ally = None
 
-def proc_pipeline(objpoints, imgpoints, img, verbose, outdir = '', name = ''):
+        self.left_fit_xvals = []
+        self.right_fit_xvals = []
+        self.y_vals = []
+        self.left_curverad = []
+        self.right_curverad = []
+        self.numel_to_store = 5
+
+
+
+def proc_pipeline(objpoints, imgpoints, img, verbose, video = '', outdir = '', name = ''):
     """ Process verbose image pipline on an image with intermediate states plotted
     and saved.
 
@@ -486,16 +488,33 @@ def proc_pipeline(objpoints, imgpoints, img, verbose, outdir = '', name = ''):
     img_bin = make_binary_image(img_roi)
     img_bin_warp = warper(img_bin, M)
     zero_right, zero_left = zero_left_right(img_bin_warp)
-    left_fit_xvals, right_fit_xvals, y_vals, avg_curverad = calc_fit(zero_left, zero_right)
+    left_fit_xvals, right_fit_xvals, y_vals, avg_curverad, left_curverad, right_curverad = calc_fit(zero_left, zero_right)
     offset = calc_offset(left_fit_xvals, right_fit_xvals, img_size)
     img_color_warp = shade_lane(img_bin_warp, left_fit_xvals, right_fit_xvals, y_vals)
     newwarp = warper(img_color_warp, Minv)
     img_result = annotate_image(newwarp, img, avg_curverad, offset)
 
+    if video == 1:
+        print('Processing video')
+
+        if len(Lanes.left_curverad) < Lanes.numel_to_store:
+            Lanes.left_fit_xvals.append(left_fit_xvals)
+            Lanes.right_fit_xvals.append(right_fit_xvals)
+            Lanes.y_vals.append(y_vals)
+            Lanes.left_curverad.append(left_curverad)
+            Lanes.right_curverad.append(right_curverad)
+            print(img_count)
+
+        if len(Lanes.left_curverad) >= Lanes.numel_to_store:
+            print(img_count)
+            print('Bazinga')
+
+
+
     if verbose:
+        print('Entering verbose mode')
         img_roicrop_warp = warper(img_roi, M)
         img_newwarp = warper(img_roicrop_warp, Minv)
-
         # Make figure of all intermediate results
         f, ((ax1, ax2, ax3), (ax4, ax5, ax6), (ax7, ax8, ax9)) = plt.subplots(3, 3, figsize=(30, 12))
         ax1.imshow(img_undistort)
@@ -533,19 +552,31 @@ def proc_pipeline(objpoints, imgpoints, img, verbose, outdir = '', name = ''):
     return img_result
 
 
+def proc_video_pipeline(img):
+    print('Bazoonga')
+    result = proc_pipeline(objpoints, imgpoints, img, False, video = 1, outdir = '', name = '')
+    return result
+
 def main():
     """
     Docstring
     """
+    global objpoints
+    global imgpoints
+    global Lanes
+    global img_count
+    Lanes = Line()
+    img_count = 0
+
     dir_cal_images = os.path.join('.', 'camera_cal')
     dir_test_images = os.path.join('test_images')
     dir_output_images = os.path.join('output_images')
 
     proc_distortion_data = 0
     proc_pipeline_cal_images = 0
-    proc_pipeline_test_images = 1
-    proc_pipeline_target_images = 0
-    verbose = True
+    proc_pipeline_test_images = 0
+    proc_pipeline_video = 1
+    verbose = False
 
     if proc_distortion_data == 1:
         objpoints, imgpoints = compute_camera_cal(dir_cal_images)
@@ -571,7 +602,6 @@ def main():
             cv2.destroyAllWindows()
             cv2.imwrite(out_path, img_undistort)
 
-
     if proc_pipeline_test_images == 1:
         search_phrase = os.path.join(dir_test_images, '*.jpg')
         images = glob.glob(search_phrase)
@@ -580,8 +610,14 @@ def main():
             curr_name = fname[-9:-4]
             ret_img = proc_pipeline(objpoints, imgpoints, img, verbose, outdir = dir_output_images, name = curr_name)
 
-    if proc_pipeline_target_images == 0:
-        print(dir_output_images)
+    if proc_pipeline_video == 1:
+        from moviepy.editor import VideoFileClip
+        output = 'project_video_processed.mp4'
+        in_clip = VideoFileClip("project_video.mp4")
+        out_clip = in_clip.fl_image(proc_video_pipeline)
+        out_clip.write_videofile(output, audio=False)
+
+
 
 
 if __name__ == "__main__":

@@ -16,7 +16,7 @@ chessboard images. (DONE)
 and vehicle position. (DONE)
 
 [t1p1_link]: https://github.com/blakejacquot/udacity_SDC_T1P1_LaneFinding/blob/master/P1.ipynb
-
+[vid1_link]: https://github.com/blakejacquot/udacity_sdc_T1P4_AdvancedLaneFinding/project_video_processed.mp4
 ##[Rubric](https://review.udacity.com/#!/rubrics/571/view) Responses
 
 
@@ -154,14 +154,9 @@ The entire pipeline is in 'main.py' in 'proc_pipeline' function. Briefly it:
 
 Below are examples of running the entire pipeline on sample provided test images.
 
-<img src="./output_images/ines1_total_results_xxx.png" width="100%"><br><br><br>
 <img src="./output_images/ines2_total_results.png" width="100%"><br><br><br>
-<img src="./output_images/test1_total_results_xxx.png" width="100%"><br><br><br>
 <img src="./output_images/test2_total_results.png" width="100%"><br><br><br>
 <img src="./output_images/test3_total_results.png" width="100%"><br><br><br>
-<img src="./output_images/test4_total_results_xxx.png" width="100%"><br><br><br>
-<img src="./output_images/test5_total_results_xxx.png" width="100%"><br><br><br>
-<img src="./output_images/test6_total_results_xxx.png" width="100%"><br><br><br>
 
 ---
 
@@ -169,7 +164,7 @@ Below are examples of running the entire pipeline on sample provided test images
 
 ####1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
 
-Here's a [link to my video result](./project_video.mp4)
+Here's a [link to my video result][vid1_link]
 
 ---
 
