@@ -8,15 +8,11 @@ import os
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-#import matplotlib.image as mpimg
-#import math
 import pickle
-#from scipy.signal import find_peaks_cwt
+import statistics
 
-#Import non-standard libraries
+from moviepy.editor import VideoFileClip
 import cv2
-
-import time
 
 
 def compute_camera_cal(dir_cal_images):
@@ -273,19 +269,18 @@ def make_binary_image(img):
     mag_binary = mag_thresh(img_blur_gray, sobel_kernel=ksize, mag_thresh=(40, 255))
     dir_binary = dir_threshold(img_blur_gray, sobel_kernel=ksize, thresh=(.65, 1.05))
 
-
-
     # Combine all the thresholding information
     combined = np.zeros_like(dir_binary)
     combined[((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1))] = 1
 
 
+
+
     # Get hls channels
     hls = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)
-    h = hls[:,:,0]
-    l = hls[:,:,1]
+    #h = hls[:,:,0]
+    #l = hls[:,:,1]
     s = hls[:,:,2]
-
     # Filter on s channel in coordination with the combined image
     s_binary = np.zeros_like(combined)
     s_binary[(s > 160) & (s < 255)] = 1
@@ -294,8 +289,28 @@ def make_binary_image(img):
     color_binary = np.zeros_like(combined)
     color_binary[(s_binary > 0) | (combined > 0)] = 1
 
+    HSV = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+    # For yellow
+    yellow = cv2.inRange(HSV, (20, 100, 100), (50, 255, 255))
+    # For white
+    sensitivity_1 = 68
+    white = cv2.inRange(HSV, (0,0,255-sensitivity_1), (255,20,255))
+    sensitivity_2 = 60
+    HSL = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)
+    white_2 = cv2.inRange(HSL, (0,255-sensitivity_2,0), (255,255,sensitivity_2))
+    white_3 = cv2.inRange(img, (200,200,200), (255,255,255))
+    #bit_layer = combined | yellow | white | white_2 | white_3
+    color_binary = np.zeros_like(combined)
+    color_binary[(s_binary > 0) | (combined > 0) | (yellow > 0) | (white > 0) | (white_2 > 0) | (white_3 > 0)] = 1
+
     if np.amax(color_binary) < 200:
         color_binary = (color_binary / np.amax(color_binary)) * 255
+
+
+
+
+
+
     return color_binary
 
 def calc_curvature(raw_x, raw_y):
@@ -371,6 +386,9 @@ def calc_offset(left_fit_xvals, right_fit_xvals, img_size):
     return offset
 
 def shade_lane(img_bin_warp, left_fit_xvals, right_fit_xvals, y_vals):
+    global polygon_points_old
+    print(polygon_points_old)
+
     # Create an image to draw the lines on
     warp_zero = np.zeros_like(img_bin_warp).astype(np.uint8)
     img_color_warp = np.dstack((warp_zero, warp_zero, warp_zero))
@@ -379,6 +397,21 @@ def shade_lane(img_bin_warp, left_fit_xvals, right_fit_xvals, y_vals):
     pts_left = np.array([np.transpose(np.vstack([left_fit_xvals, y_vals]))])
     pts_right = np.array([np.flipud(np.transpose(np.vstack([right_fit_xvals, y_vals])))])
     pts = np.hstack((pts_left, pts_right))
+
+
+#     if (polygon_points_old == None):
+#         polygon_points_old = pts
+#
+#     a = polygon_points_old
+#     b = pts
+#     ret = cv2.matchShapes(a,b,1,0.0)
+#
+#     if (ret < 0.045):
+#         polygon_points_old = pts
+#
+#     else:
+#         pts = polygon_points_old
+
 
     # Draw the lane onto the warped blank image
     cv2.fillPoly(img_color_warp, np.int_([pts]), (0,255, 0))
@@ -444,7 +477,8 @@ class Line():
         self.y_vals = []
         self.left_curverad = []
         self.right_curverad = []
-        self.numel_to_store = 5
+        self.numel_to_store = 11
+        self.image_index = 0
 
 
 
@@ -483,10 +517,19 @@ def proc_pipeline(objpoints, imgpoints, img, verbose, video = '', outdir = '', n
     img_size = (img_shape[1],img_shape[0])
     src, dst = make_src_dst(img_shape)
     img_undistort = undistort_image(objpoints, imgpoints, img)
-    img_roi = region_of_interest(img_undistort, src)
     M, Minv = get_warp_params(img, src, dst)
-    img_bin = make_binary_image(img_roi)
-    img_bin_warp = warper(img_bin, M)
+
+
+#    img_roi = region_of_interest(img_undistort, src)
+#    img_bin = make_binary_image(img_roi)
+
+
+    img_bin = make_binary_image(img_undistort)
+    img_roi = region_of_interest(img_bin, src)
+
+
+
+    img_bin_warp = warper(img_roi, M)
     zero_right, zero_left = zero_left_right(img_bin_warp)
     left_fit_xvals, right_fit_xvals, y_vals, avg_curverad, left_curverad, right_curverad = calc_fit(zero_left, zero_right)
     offset = calc_offset(left_fit_xvals, right_fit_xvals, img_size)
@@ -494,45 +537,97 @@ def proc_pipeline(objpoints, imgpoints, img, verbose, video = '', outdir = '', n
     newwarp = warper(img_color_warp, Minv)
     img_result = annotate_image(newwarp, img, avg_curverad, offset)
 
-    if video == 1:
-        print('Processing video')
 
-        if len(Lanes.left_curverad) < Lanes.numel_to_store:
-            Lanes.left_fit_xvals.append(left_fit_xvals)
-            Lanes.right_fit_xvals.append(right_fit_xvals)
-            Lanes.y_vals.append(y_vals)
-            Lanes.left_curverad.append(left_curverad)
-            Lanes.right_curverad.append(right_curverad)
-            print(img_count)
+    if len(Lanes.left_curverad) < Lanes.numel_to_store:
+        Lanes.left_fit_xvals.append(left_fit_xvals)
+        Lanes.right_fit_xvals.append(right_fit_xvals)
+        Lanes.y_vals.append(y_vals)
+        Lanes.left_curverad.append(left_curverad)
+        Lanes.right_curverad.append(right_curverad)
 
-        if len(Lanes.left_curverad) >= Lanes.numel_to_store:
-            print(img_count)
-            print('Bazinga')
+    if len(Lanes.left_curverad) >= Lanes.numel_to_store:
+        print(' ')
+        print('***Starting from fully-populated list')
+        print(' ')
+
+        # Update the list with new values
+        image_index = Lanes.image_index
+        Lanes.left_fit_xvals[image_index] = left_fit_xvals
+        Lanes.right_fit_xvals[image_index] = right_fit_xvals
+        Lanes.y_vals[image_index] = y_vals
+        Lanes.left_curverad[image_index] = left_curverad
+        Lanes.right_curverad[image_index] = right_curverad
+
+        # Find index of median radius of curvature for both left and right
+        median_left_curverad = statistics.median(Lanes.left_curverad)
+        median_right_curverad = statistics.median(Lanes.right_curverad)
+        left_index = Lanes.left_curverad.index(median_left_curverad)
+        right_index = Lanes.right_curverad.index(median_right_curverad)
+        print('Left, Right index = ', left_index, right_index)
+
+        # Get fit values associated with the curvature
+        left_fit_xvals = Lanes.left_fit_xvals[left_index]
+        right_fit_xvals = Lanes.right_fit_xvals[right_index]
+        print('Left, Right fit = ', left_fit_xvals, right_fit_xvals)
 
 
+        # y_vals is always the same
+        y_vals = Lanes.y_vals[left_index]
+
+        # Calculate the remainder of the pipeline with new parameters
+        offset = calc_offset(left_fit_xvals, right_fit_xvals, img_size)
+        img_color_warp = shade_lane(img_bin_warp, left_fit_xvals, right_fit_xvals, y_vals)
+        newwarp = warper(img_color_warp, Minv)
+        img_result = annotate_image(newwarp, img, avg_curverad, offset)
+
+        # Calculate new index position. Ensure we are wrapping when we get to end.
+        Lanes.image_index = Lanes.image_index + 1
+        if Lanes.image_index == Lanes.numel_to_store:
+            Lanes.image_index = 0
+
+        print('Offset = ', offset)
+        print('Index = ', Lanes.image_index)
 
     if verbose:
         print('Entering verbose mode')
-        img_roicrop_warp = warper(img_roi, M)
-        img_newwarp = warper(img_roicrop_warp, Minv)
+
+        img_roicrop = region_of_interest(img, src)
+        img_newwarp = warper(img_roicrop, M)
+
+
+        #img_roicrop_warp = warper(img_roi, M)
+        #img_newwarp = warper(img_roicrop_warp, Minv)
         # Make figure of all intermediate results
-        f, ((ax1, ax2, ax3), (ax4, ax5, ax6), (ax7, ax8, ax9)) = plt.subplots(3, 3, figsize=(30, 12))
+        f, ((ax1, ax2, ax3), (ax4, ax5, ax6), (ax7, ax8, ax9), (ax10, ax11, ax12)) = plt.subplots(4, 3, figsize=(30, 12))
         ax1.imshow(img_undistort)
         ax1.set_title('Undistorted original image')
-        ax2.imshow(img_roicrop_warp, cmap = 'gray')
-        ax2.set_title('Warped image cropped to ROI')
-        ax3.imshow(img_newwarp, cmap = 'gray')
+        ax2.imshow(img_roicrop)
+        ax2.set_title('Warped image')
+        ax3.imshow(img_newwarp)
         ax3.set_title('De-warped image (to show it can be done)')
         ax4.imshow(img_bin, cmap = 'gray')
-        ax4.set_title('Undistorted binary')
-        ax5.imshow(img_bin_warp, cmap = 'gray')
-        ax5.plot(left_fit_xvals, y_vals, c='g', linewidth = 2)
-        ax5.plot(right_fit_xvals, y_vals, c='b', linewidth = 2)
-        ax5.set_title('Transform binary and fit lanes')
-        ax6.imshow(img_color_warp)
-        ax6.set_title('Lane shaded on binary image')
-        ax7.imshow(img_result)
-        ax7.set_title('Annotated, undistorted image')
+        ax4.set_title('Binary image')
+        ax5.imshow(img_roi, cmap = 'gray')
+        ax5.set_title('ROI image')
+        ax6.imshow(img_bin_warp, cmap = 'gray')
+        ax6.set_title('Transform binary')
+
+        ax7.imshow(zero_right, cmap = 'gray')
+        ax7.set_title('Zero right image')
+        ax8.imshow(zero_left, cmap = 'gray')
+        ax8.set_title('Zero left image')
+
+
+
+        ax10.imshow(img_bin_warp, cmap = 'gray')
+        ax10.plot(left_fit_xvals, y_vals, c='g', linewidth = 2)
+        ax10.plot(right_fit_xvals, y_vals, c='b', linewidth = 2)
+        ax10.set_title('Transform binary and fit lanes')
+        ax11.imshow(img_color_warp)
+        ax11.set_title('Lane shaded on binary image')
+        ax12.imshow(img_result)
+        ax12.set_title('Annotated, undistorted image')
+
         plt.show()
         out_path = os.path.join(outdir, name + '_total_results' + '.png')
         print(' ')
@@ -544,7 +639,7 @@ def proc_pipeline(objpoints, imgpoints, img, verbose, video = '', outdir = '', n
 
         # Show large version of annotated final image
         cv2.imshow('Annotated final image', img_result)
-        cv2.waitKey(1000)
+        cv2.waitKey(100)
         cv2.destroyAllWindows()
         out_path = os.path.join(outdir, name + '_annotatedfinal' + '.jpg')
         cv2.imwrite(out_path, img_result)
@@ -553,7 +648,6 @@ def proc_pipeline(objpoints, imgpoints, img, verbose, video = '', outdir = '', n
 
 
 def proc_video_pipeline(img):
-    print('Bazoonga')
     result = proc_pipeline(objpoints, imgpoints, img, False, video = 1, outdir = '', name = '')
     return result
 
@@ -565,6 +659,8 @@ def main():
     global imgpoints
     global Lanes
     global img_count
+    global polygon_points_old
+    polygon_points_old = None
     Lanes = Line()
     img_count = 0
 
@@ -574,9 +670,9 @@ def main():
 
     proc_distortion_data = 0
     proc_pipeline_cal_images = 0
-    proc_pipeline_test_images = 0
-    proc_pipeline_video = 1
-    verbose = False
+    proc_pipeline_test_images = 1
+    proc_pipeline_video = 0
+    verbose = True
 
     if proc_distortion_data == 1:
         objpoints, imgpoints = compute_camera_cal(dir_cal_images)
@@ -611,11 +707,10 @@ def main():
             ret_img = proc_pipeline(objpoints, imgpoints, img, verbose, outdir = dir_output_images, name = curr_name)
 
     if proc_pipeline_video == 1:
-        from moviepy.editor import VideoFileClip
         output = 'project_video_processed.mp4'
         in_clip = VideoFileClip("project_video.mp4")
         out_clip = in_clip.fl_image(proc_video_pipeline)
-        #out_clip.write_videofile(output, audio=False)
+        out_clip.write_videofile(output, audio=False)
 
 
 

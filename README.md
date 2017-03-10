@@ -189,8 +189,6 @@ filter on left curvature to get best left lane fit and repeat this for right. Th
 that median filtering is least likely to be a wacky fit. Then additional checks could be done
 on the curvature before overlaying the shaded lane.
 
+I played around with making the Line object global, but this didn't work. And then I ran out of time.
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why,
-where the pipeline might fail and how I might improve it if I were going to pursue this
-project further.
-
+I had to do an ugly 'global' workaround on a few variables to get the code to work as it is.

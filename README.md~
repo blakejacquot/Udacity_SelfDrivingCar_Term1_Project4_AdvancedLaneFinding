@@ -16,7 +16,7 @@ chessboard images. (DONE)
 and vehicle position. (DONE)
 
 [t1p1_link]: https://github.com/blakejacquot/udacity_SDC_T1P1_LaneFinding/blob/master/P1.ipynb
-[vid1_link]: https://github.com/blakejacquot/udacity_sdc_T1P4_AdvancedLaneFinding/project_video_processed.mp4
+[vid1_link]: https://github.com/blakejacquot/udacity_sdc_T1P4_AdvancedLaneFinding/blob/master/project_video_processed.mp4
 ##[Rubric](https://review.udacity.com/#!/rubrics/571/view) Responses
 
 
@@ -189,8 +189,4 @@ filter on left curvature to get best left lane fit and repeat this for right. Th
 that median filtering is least likely to be a wacky fit. Then additional checks could be done
 on the curvature before overlaying the shaded lane.
 
-
-Here I'll talk about the approach I took, what techniques I used, what worked and why,
-where the pipeline might fail and how I might improve it if I were going to pursue this
-project further.
-
+I played around with making the Line object global, but this didn't work. And then I ran out of time.
