@@ -323,6 +323,11 @@ def zero_left_right(img_bin_warp):
     zero_left = img_bin_warp.copy()
     zero_right[0:img_shape[0], img_shape[1]/2:img_shape[1]] = 0
     zero_left[0:img_shape[0], 0:img_shape[1]/2] = 0
+
+    zero_right[0:img_shape[0], 450:img_shape[1]] = 0
+    zero_left[0:img_shape[0], 0:900] = 0
+
+
     return zero_right, zero_left
 
 
@@ -414,6 +419,13 @@ def make_src_dst(img_shape):
     br_src = (1150, img_shape[0] - offset_for_obscuration) # bottom right
     bl_src = (225,img_shape[0] - offset_for_obscuration) # bottom left
     src = np.float32([[tl_src, tr_src, br_src, bl_src]])
+
+    tl_src = (560, 475) # top left
+    tr_src = (735, 475) # top right
+    br_src = (1150, img_shape[0] - offset_for_obscuration) # bottom right
+    bl_src = (225,img_shape[0] - offset_for_obscuration) # bottom left
+    src = np.float32([[tl_src, tr_src, br_src, bl_src]])
+
 
     # Define dst points for transform
     tl_dst = [320, 0] # top left
@@ -583,14 +595,14 @@ def proc_pipeline(objpoints, imgpoints, img, verbose, video = '', outdir = '', n
         ax4.imshow(img_bin, cmap = 'gray')
         ax4.set_title('Binary image')
         ax5.imshow(img_roi, cmap = 'gray')
-        ax5.set_title('ROI image')
+        ax5.set_title('Binary image after ROI cropping')
         ax6.imshow(img_bin_warp, cmap = 'gray')
-        ax6.set_title('Transform binary')
+        ax6.set_title('Warp binary')
 
         ax7.imshow(zero_right, cmap = 'gray')
-        ax7.set_title('Zero right image')
+        ax7.set_title('Left lanes for fitting')
         ax8.imshow(zero_left, cmap = 'gray')
-        ax8.set_title('Zero left image')
+        ax8.set_title('Right lanes for fitting')
         ax9.set_title('No image')
 
 
@@ -598,7 +610,7 @@ def proc_pipeline(objpoints, imgpoints, img, verbose, video = '', outdir = '', n
         ax10.imshow(img_bin_warp, cmap = 'gray')
         ax10.plot(left_fit_xvals, y_vals, c='g', linewidth = 2)
         ax10.plot(right_fit_xvals, y_vals, c='b', linewidth = 2)
-        ax10.set_title('Transform binary and fit lanes')
+        ax10.set_title('Warp of binary and fit of lanes')
         ax11.imshow(img_color_warp)
         ax11.set_title('Lane shaded on binary image')
         ax12.imshow(img_result)

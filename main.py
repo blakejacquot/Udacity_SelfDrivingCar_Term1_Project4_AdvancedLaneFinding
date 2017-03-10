@@ -323,6 +323,11 @@ def zero_left_right(img_bin_warp):
     zero_left = img_bin_warp.copy()
     zero_right[0:img_shape[0], img_shape[1]/2:img_shape[1]] = 0
     zero_left[0:img_shape[0], 0:img_shape[1]/2] = 0
+
+    zero_right[0:img_shape[0], 450:img_shape[1]] = 0
+    zero_left[0:img_shape[0], 0:900] = 0
+
+
     return zero_right, zero_left
 
 
@@ -414,6 +419,13 @@ def make_src_dst(img_shape):
     br_src = (1150, img_shape[0] - offset_for_obscuration) # bottom right
     bl_src = (225,img_shape[0] - offset_for_obscuration) # bottom left
     src = np.float32([[tl_src, tr_src, br_src, bl_src]])
+
+    tl_src = (560, 475) # top left
+    tr_src = (735, 475) # top right
+    br_src = (1150, img_shape[0] - offset_for_obscuration) # bottom right
+    bl_src = (225,img_shape[0] - offset_for_obscuration) # bottom left
+    src = np.float32([[tl_src, tr_src, br_src, bl_src]])
+
 
     # Define dst points for transform
     tl_dst = [320, 0] # top left
@@ -646,9 +658,9 @@ def main():
 
     proc_distortion_data = 0
     proc_pipeline_cal_images = 0
-    proc_pipeline_test_images = 1
-    proc_pipeline_video = 0
-    verbose = True
+    proc_pipeline_test_images = 0
+    proc_pipeline_video = 1
+    verbose = False
 
     if proc_distortion_data == 1:
         objpoints, imgpoints = compute_camera_cal(dir_cal_images)

@@ -172,23 +172,21 @@ Here's a [link to my video result][vid1_link]
 
 ####1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-Issue 1: Shadows
-The code isn't tolerant to shadows and sometimes interprets them as lane lines. A step towards
-making it more robust would be more accurate masking. Also, may play around with different
-color channels for screening.
+Issue 1: Finding lanes
+I got improved results by doing edge detection before cropping to ROI. If cropping first,
+sometimes the crop was identified as an edge.
 
-Issue 2: Hysteresis
-I had problems implementing the Line() class to compare current frame results to past frames.
-My idea was clear, but I couldn't figure out how to fold it into the following lines and
-subsequent function calls:
-'out_clip = in_clip.fl_image(proc_video_pipeline)'
-'out_clip.write_videofile(output, audio=False)'
+In addition to edge detection, I did color detection to get yellow and white lines to pop
+out. After converting pixels to binary values, I did 'OR' operation on all binary maps
+to make final image.
 
-My idea was to have the class hold all lane variables for last 'n' frames. Then do median
-filter on left curvature to get best left lane fit and repeat this for right. The assumption is
-that median filtering is least likely to be a wacky fit. Then additional checks could be done
-on the curvature before overlaying the shaded lane.
+Issue 2: Fitting lanes
+Fits were done on transformed image after zeroing out all non-lane regions. The tuning of
+regions to zero out took trial and error.
 
-I played around with making the Line object global, but this didn't work. And then I ran out of time.
+Issue 3: Filtering results
+I made a global Line() class to store current and past results. In my final implementation
+I stored the last 11 results. Of those results, I filtered to find median curvature for
+left and right lanes. The index of those curvatures was used to select the fit parameters.
 
-I had to do an ugly 'global' workaround on a few variables to get the code to work as it is.
+In this way, the results were smoothed and less likely to be thrown off by spurious images.
