@@ -273,9 +273,6 @@ def make_binary_image(img):
     combined = np.zeros_like(dir_binary)
     combined[((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1))] = 1
 
-
-
-
     # Get hls channels
     hls = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)
     #h = hls[:,:,0]
@@ -286,8 +283,6 @@ def make_binary_image(img):
     s_binary[(s > 160) & (s < 255)] = 1
     # Stack each channel to view their individual contributions in green and blue respectively
     # This returns a stack of the two binary images, whose components you can see as different colors
-    color_binary = np.zeros_like(combined)
-    color_binary[(s_binary > 0) | (combined > 0)] = 1
 
     HSV = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
     # For yellow
@@ -305,11 +300,6 @@ def make_binary_image(img):
 
     if np.amax(color_binary) < 200:
         color_binary = (color_binary / np.amax(color_binary)) * 255
-
-
-
-
-
 
     return color_binary
 
@@ -397,21 +387,6 @@ def shade_lane(img_bin_warp, left_fit_xvals, right_fit_xvals, y_vals):
     pts_left = np.array([np.transpose(np.vstack([left_fit_xvals, y_vals]))])
     pts_right = np.array([np.flipud(np.transpose(np.vstack([right_fit_xvals, y_vals])))])
     pts = np.hstack((pts_left, pts_right))
-
-
-#     if (polygon_points_old == None):
-#         polygon_points_old = pts
-#
-#     a = polygon_points_old
-#     b = pts
-#     ret = cv2.matchShapes(a,b,1,0.0)
-#
-#     if (ret < 0.045):
-#         polygon_points_old = pts
-#
-#     else:
-#         pts = polygon_points_old
-
 
     # Draw the lane onto the warped blank image
     cv2.fillPoly(img_color_warp, np.int_([pts]), (0,255, 0))
@@ -602,9 +577,9 @@ def proc_pipeline(objpoints, imgpoints, img, verbose, video = '', outdir = '', n
         ax1.imshow(img_undistort)
         ax1.set_title('Undistorted original image')
         ax2.imshow(img_roicrop)
-        ax2.set_title('Warped image')
+        ax2.set_title('ROI-cropped image')
         ax3.imshow(img_newwarp)
-        ax3.set_title('De-warped image (to show it can be done)')
+        ax3.set_title('Warped color image after cropping')
         ax4.imshow(img_bin, cmap = 'gray')
         ax4.set_title('Binary image')
         ax5.imshow(img_roi, cmap = 'gray')
@@ -616,6 +591,7 @@ def proc_pipeline(objpoints, imgpoints, img, verbose, video = '', outdir = '', n
         ax7.set_title('Zero right image')
         ax8.imshow(zero_left, cmap = 'gray')
         ax8.set_title('Zero left image')
+        ax9.set_title('No image')
 
 
 
